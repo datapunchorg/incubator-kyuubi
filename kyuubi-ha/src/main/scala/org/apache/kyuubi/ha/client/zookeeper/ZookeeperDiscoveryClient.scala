@@ -182,7 +182,9 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
       sizeOpt: Option[Int] = None,
       silent: Boolean = false): Seq[ServiceNodeInfo] = {
     try {
+      info(s"Getting service nodes info, namespace: $namespace")
       val hosts = zkClient.getChildren.forPath(namespace)
+      info(s"Got ${hosts.size()} service nodes, namespace: $namespace")
       val size = sizeOpt.getOrElse(hosts.size())
       hosts.asScala.takeRight(size).map { p =>
         val path = ZKPaths.makePath(namespace, p)
@@ -226,6 +228,7 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
                        version: Option[String] = None,
                        external: Boolean = false): Unit = {
     val instance = connectionUrl
+    info(s"Creating zookeeper persistent node, namespace: $namespace, instance: $instance")
     serviceNode = createPersistentNode(conf, namespace, instance, version, external)
   }
 

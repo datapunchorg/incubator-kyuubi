@@ -155,7 +155,8 @@ private[kyuubi] class EngineRef(
 
   private def create(
       discoveryClient: DiscoveryClient,
-      extraEngineLog: Option[OperationLog]): (String, Int) = tryWithLock(discoveryClient) {
+      // extraEngineLog: Option[OperationLog]): (String, Int) = tryWithLock(discoveryClient) {
+      extraEngineLog: Option[OperationLog]): (String, Int) = {
     // Get the engine address ahead if another process has succeeded
     var engineRef = discoveryClient.getServerHost(engineSpace)
     if (engineRef.nonEmpty) return engineRef.get
@@ -189,6 +190,7 @@ private[kyuubi] class EngineRef(
       val process = builder.start
       var exitValue: Option[Int] = None
       while (engineRef.isEmpty) {
+        info(s"Checking and waiting engine ready, engineRefId: $engineRefId")
         if (exitValue.isEmpty && process.waitFor(1, TimeUnit.SECONDS)) {
           exitValue = Some(process.exitValue())
           if (exitValue.get != 0) {
@@ -209,6 +211,9 @@ private[kyuubi] class EngineRef(
             builder.getError)
         }
         engineRef = discoveryClient.getEngineByRefId(engineSpace, engineRefId)
+        if (engineRef.isEmpty) {
+          Thread.sleep(3000)
+        }
       }
       engineRef.get
     } finally {
