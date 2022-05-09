@@ -19,11 +19,13 @@ package org.apache.kyuubi.server.api.v1
 
 import javax.ws.rs._
 import javax.ws.rs.core.MediaType
+
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+
 import org.apache.kyuubi.Logging
-import org.apache.kyuubi.ha.client.{DiscoveryClientProvider, ServiceNodeInfo}
+import org.apache.kyuubi.ha.client.DiscoveryClientProvider
 import org.apache.kyuubi.server.api.ApiRequestContext
 import org.apache.kyuubi.session.KyuubiSessionManager
 
@@ -178,7 +180,8 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
       DiscoveryClientProvider.withDiscoveryClient(conf) {
         c => c.getServiceNodesInfo(namespace, sizeOpt, silent)
       }
-    GetServiceNodesInfoResponse(result.map(convertServiceNodeInfo(_)).toArray)
+    GetServiceNodesInfoResponse(
+      result.map(GetServiceNodesInfoResponseServiceNodeInfo.convert(_)).toArray)
   }
 
   @ApiResponse(
@@ -231,17 +234,6 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
           request.external)
       }
     CreateAndGetServiceNodeResponse(result)
-  }
-
-  private def convertServiceNodeInfo(info: ServiceNodeInfo) = {
-    GetServiceNodesInfoResponseServiceNodeInfo(
-      namespace = info.namespace,
-      nodeName = info.nodeName,
-      host = info.host,
-      port = info.port,
-      version = info.version.getOrElse(null),
-      engineRefId = info.engineRefId.getOrElse(null)
-    )
   }
 }
 

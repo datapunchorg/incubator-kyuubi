@@ -19,6 +19,8 @@ package org.apache.kyuubi.ha.client.restclient
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
+import org.apache.kyuubi.ha.client.ServiceNodeInfo
+
 case class DeletePathResponse()
 
 case class CreatePathRequest(@JsonProperty("path") path: String,
@@ -43,12 +45,38 @@ case class GetServiceNodesInfoResponse(@JsonProperty("data") data:
                                        Array[GetServiceNodesInfoResponseServiceNodeInfo])
 
 case class GetServiceNodesInfoResponseServiceNodeInfo(
-                            @JsonProperty("namespace") namespace: String,
-                            @JsonProperty("nodeName") nodeName: String,
-                            @JsonProperty("host") host: String,
-                            @JsonProperty("port") port: Int,
-                            @JsonProperty("version") version: String,
-                            @JsonProperty("engineRefId") engineRefId: String) {
+                           @JsonProperty("namespace") namespace: String,
+                           @JsonProperty("nodeName") nodeName: String,
+                           @JsonProperty("host") host: String,
+                           @JsonProperty("port") port: Int,
+                           @JsonProperty("version") version: String,
+                           @JsonProperty("engineRefId") engineRefId: String) {
+}
+
+object GetServiceNodesInfoResponseServiceNodeInfo {
+  def convert(info: ServiceNodeInfo):
+  GetServiceNodesInfoResponseServiceNodeInfo = {
+    GetServiceNodesInfoResponseServiceNodeInfo(
+      namespace = info.namespace,
+      nodeName = info.nodeName,
+      host = info.host,
+      port = info.port,
+      version = info.version.getOrElse(null),
+      engineRefId = info.engineRefId.getOrElse(null)
+    )
+  }
+
+  def convert(info: GetServiceNodesInfoResponseServiceNodeInfo):
+  ServiceNodeInfo = {
+    ServiceNodeInfo(
+      namespace = info.namespace,
+      nodeName = info.nodeName,
+      host = info.host,
+      port = info.port,
+      version = Option(info.version),
+      engineRefId = Option(info.engineRefId)
+    )
+  }
 }
 
 case class RegisterServiceRequest(@JsonProperty("namespace") namespace: String,

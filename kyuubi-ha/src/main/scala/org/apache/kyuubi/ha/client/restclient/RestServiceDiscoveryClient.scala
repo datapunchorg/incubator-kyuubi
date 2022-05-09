@@ -173,7 +173,8 @@ class RestServiceDiscoveryClient(val rootUrl: String = "http://localhost:8080/ap
       s"&silent=${silent}"
     val responseBody = getHttp(url)
     val responseObject = objectMapper.readValue(responseBody, classOf[GetServiceNodesInfoResponse])
-    responseObject.data.toList
+    responseObject.data.map(
+      GetServiceNodesInfoResponseServiceNodeInfo.convert(_)).toList
   }
 
   override def registerService(conf: KyuubiConf, namespace: String,

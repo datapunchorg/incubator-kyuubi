@@ -17,9 +17,9 @@
 
 package org.apache.kyuubi.server.api.v1
 
-import org.apache.kyuubi.ha.client.ServiceNodeInfo
-
 import com.fasterxml.jackson.annotation.JsonProperty
+
+import org.apache.kyuubi.ha.client.ServiceNodeInfo
 
 case class DeletePathResponse()
 
@@ -51,6 +51,32 @@ case class GetServiceNodesInfoResponseServiceNodeInfo(
                                        @JsonProperty("port") port: Int,
                                        @JsonProperty("version") version: String,
                                        @JsonProperty("engineRefId") engineRefId: String) {
+}
+
+object GetServiceNodesInfoResponseServiceNodeInfo {
+  def convert(info: ServiceNodeInfo):
+  GetServiceNodesInfoResponseServiceNodeInfo = {
+    GetServiceNodesInfoResponseServiceNodeInfo(
+      namespace = info.namespace,
+      nodeName = info.nodeName,
+      host = info.host,
+      port = info.port,
+      version = info.version.getOrElse(null),
+      engineRefId = info.engineRefId.getOrElse(null)
+    )
+  }
+
+  def convert(info: GetServiceNodesInfoResponseServiceNodeInfo):
+  ServiceNodeInfo = {
+    ServiceNodeInfo(
+      namespace = info.namespace,
+      nodeName = info.nodeName,
+      host = info.host,
+      port = info.port,
+      version = Option(info.version),
+      engineRefId = Option(info.engineRefId)
+    )
+  }
 }
 
 case class RegisterServiceRequest(@JsonProperty("namespace") namespace: String,
