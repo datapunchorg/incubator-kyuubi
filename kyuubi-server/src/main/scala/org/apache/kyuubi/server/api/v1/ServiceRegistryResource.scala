@@ -194,11 +194,7 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
   @Path("/registerService")
   @Consumes(Array(MediaType.APPLICATION_JSON))
   def registerService(request: RegisterServiceRequest): RegisterServiceResponse = {
-    val version = if (request.version == null) {
-      None
-    } else {
-      Some(request.version)
-    }
+    val version = Option(request.version)
     DiscoveryClientProvider.withDiscoveryClient(conf) {
       c => c.registerServiceSimple(conf,
         request.namespace,
@@ -220,11 +216,7 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
   @Consumes(Array(MediaType.APPLICATION_JSON))
   def createAndGetServiceNode(request: CreateAndGetServiceNodeRequest):
     CreateAndGetServiceNodeResponse = {
-    val version = if (request.version == null) {
-      None
-    } else {
-      Some(request.version)
-    }
+    val version = Option(request.version)
     val result =
       DiscoveryClientProvider.withDiscoveryClient(conf) {
         c => c.createAndGetServiceNode(conf,
