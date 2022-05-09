@@ -182,6 +182,58 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
       }
     GetServiceNodesInfoResponse(result.toArray)
   }
+
+  @ApiResponse(
+    responseCode = "200",
+    content = Array(new Content(
+      mediaType = MediaType.APPLICATION_JSON,
+      schema = new Schema(implementation = classOf[RegisterServiceResponse]))),
+    description = "Register service")
+  @POST
+  @Path("/registerService")
+  @Consumes(Array(MediaType.APPLICATION_JSON))
+  def registerService(request: RegisterServiceRequest): RegisterServiceResponse = {
+    val version = if (request.version == null) {
+      None
+    } else {
+      Some(request.version)
+    }
+    DiscoveryClientProvider.withDiscoveryClient(conf) {
+      c => c.registerServiceSimple(conf,
+        request.namespace,
+        request.connectionUrl,
+        version,
+        request.external)
+    }
+    RegisterServiceResponse()
+  }
+
+  @ApiResponse(
+    responseCode = "200",
+    content = Array(new Content(
+      mediaType = MediaType.APPLICATION_JSON,
+      schema = new Schema(implementation = classOf[CreateAndGetServiceNodeResponse]))),
+    description = "Register service")
+  @POST
+  @Path("/createAndGetServiceNode")
+  @Consumes(Array(MediaType.APPLICATION_JSON))
+  def createAndGetServiceNode(request: CreateAndGetServiceNodeRequest):
+    CreateAndGetServiceNodeResponse = {
+    val version = if (request.version == null) {
+      None
+    } else {
+      Some(request.version)
+    }
+    val result =
+      DiscoveryClientProvider.withDiscoveryClient(conf) {
+        c => c.createAndGetServiceNode(conf,
+          request.namespace,
+          request.instance,
+          version,
+          request.external)
+      }
+    CreateAndGetServiceNodeResponse(result)
+  }
 }
 
 

@@ -39,3 +39,16 @@ case class GetEngineByRefIdResponse(host: String, port: Int)
 
 case class GetServiceNodesInfoResponse(data: Array[ServiceNodeInfo])
 
+case class RegisterServiceRequest(namespace: String,
+                                        connectionUrl: String,
+                                        version: String = null,
+                                        external: Boolean = false)
+
+case class RegisterServiceResponse()
+
+case class CreateAndGetServiceNodeRequest(namespace: String,
+                                          instance: String,
+                                  version: String = null,
+                                  external: Boolean = false)
+
+case class CreateAndGetServiceNodeResponse(path: String)

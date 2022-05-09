@@ -219,6 +219,16 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
     }
   }
 
+  def registerServiceSimple(
+                       conf: KyuubiConf,
+                       namespace: String,
+                       connectionUrl: String,
+                       version: Option[String] = None,
+                       external: Boolean = false): Unit = {
+    val instance = connectionUrl
+    serviceNode = createPersistentNode(conf, namespace, instance, version, external)
+  }
+
   def deregisterService(): Unit = {
     // close the EPHEMERAL_SEQUENTIAL node in zk
     if (serviceNode != null) {
