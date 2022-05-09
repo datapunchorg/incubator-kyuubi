@@ -19,9 +19,11 @@ package org.apache.kyuubi.server.api.v1
 
 import javax.ws.rs._
 import javax.ws.rs.core.MediaType
+
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+
 import org.apache.kyuubi.Logging
 import org.apache.kyuubi.ha.client.DiscoveryClientProvider
 import org.apache.kyuubi.server.api.ApiRequestContext
@@ -114,6 +116,71 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
         c => c.delete(path, deleteChildren)
       }
     EmptyResponse()
+  }
+
+  @ApiResponse(
+    responseCode = "200",
+    content = Array(new Content(
+      mediaType = MediaType.APPLICATION_JSON,
+      schema = new Schema(implementation = classOf[GetServerHostResponse]))),
+    description = "get server host and port")
+  @GET
+  @Path("/getServerHost")
+  def getServerHost(@QueryParam("namespace") namespace: String): GetServerHostResponse = {
+    val result =
+      DiscoveryClientProvider.withDiscoveryClient(conf) {
+        c => c.getServerHost(namespace)
+      }
+    if (result.isEmpty) {
+      GetServerHostResponse(null, 0)
+    } else {
+      GetServerHostResponse(result.get._1, result.get._2)
+    }
+  }
+
+  @ApiResponse(
+    responseCode = "200",
+    content = Array(new Content(
+      mediaType = MediaType.APPLICATION_JSON,
+      schema = new Schema(implementation = classOf[GetEngineByRefIdResponse]))),
+    description = "get engine host and port")
+  @GET
+  @Path("/getEngineByRefId")
+  def getEngineByRefId(@QueryParam("namespace") namespace: String,
+                       @QueryParam("engineRefId") engineRefId: String): GetEngineByRefIdResponse = {
+    val result =
+      DiscoveryClientProvider.withDiscoveryClient(conf) {
+        c => c.getEngineByRefId(namespace, engineRefId)
+      }
+    if (result.isEmpty) {
+      GetEngineByRefIdResponse(null, 0)
+    } else {
+      GetEngineByRefIdResponse(result.get._1, result.get._2)
+    }
+  }
+
+  @ApiResponse(
+    responseCode = "200",
+    content = Array(new Content(
+      mediaType = MediaType.APPLICATION_JSON,
+      schema = new Schema(implementation = classOf[GetServiceNodesInfoResponse]))),
+    description = "get service nodes information")
+  @GET
+  @Path("/getServiceNodesInfo")
+  def getServiceNodesInfo(@QueryParam("namespace") namespace: String,
+                          @QueryParam("sizeOpt") size: Int = 0,
+                        @QueryParam("silent") silent: Boolean = false):
+    GetServiceNodesInfoResponse = {
+    val sizeOpt = if (size <= 0) {
+      None
+    } else {
+      Some(size)
+    }
+    val result =
+      DiscoveryClientProvider.withDiscoveryClient(conf) {
+        c => c.getServiceNodesInfo(namespace, sizeOpt, silent)
+      }
+    GetServiceNodesInfoResponse(result.toArray)
   }
 }
 

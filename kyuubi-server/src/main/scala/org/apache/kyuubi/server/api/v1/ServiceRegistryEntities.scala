@@ -17,6 +17,10 @@
 
 package org.apache.kyuubi.server.api.v1
 
+import org.apache.kyuubi.ha.client.ServiceNodeInfo
+
+case class EmptyResponse()
+
 case class CreatePathRequest(path: String,
                               mode: String,
                               createParent: Boolean = true)
@@ -29,4 +33,9 @@ case class GetPathChildrenResponse(children: Array[String])
 
 case class GetPathExistsResponse(exists: Boolean)
 
-case class EmptyResponse()
+case class GetServerHostResponse(host: String, port: Int)
+
+case class GetEngineByRefIdResponse(host: String, port: Int)
+
+case class GetServiceNodesInfoResponse(data: Array[ServiceNodeInfo])
+
