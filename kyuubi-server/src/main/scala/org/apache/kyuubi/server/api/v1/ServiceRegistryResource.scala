@@ -19,13 +19,11 @@ package org.apache.kyuubi.server.api.v1
 
 import javax.ws.rs._
 import javax.ws.rs.core.MediaType
-
 import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
-
 import org.apache.kyuubi.Logging
-import org.apache.kyuubi.ha.client.DiscoveryClientProvider
+import org.apache.kyuubi.ha.client.{DiscoveryClientProvider, ServiceNodeInfo}
 import org.apache.kyuubi.server.api.ApiRequestContext
 import org.apache.kyuubi.session.KyuubiSessionManager
 
@@ -106,16 +104,16 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
     responseCode = "200",
     content = Array(new Content(
       mediaType = MediaType.APPLICATION_JSON,
-      schema = new Schema(implementation = classOf[EmptyResponse]))),
+      schema = new Schema(implementation = classOf[DeletePathResponse]))),
     description = "delete path")
   @GET
   @Path("/deletePath")
   def deletePath(@QueryParam("path") path: String,
-                 @QueryParam("deleteChildren") deleteChildren: Boolean): EmptyResponse = {
+                 @QueryParam("deleteChildren") deleteChildren: Boolean): DeletePathResponse = {
       DiscoveryClientProvider.withDiscoveryClient(conf) {
         c => c.delete(path, deleteChildren)
       }
-    EmptyResponse()
+    DeletePathResponse()
   }
 
   @ApiResponse(
@@ -180,7 +178,7 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
       DiscoveryClientProvider.withDiscoveryClient(conf) {
         c => c.getServiceNodesInfo(namespace, sizeOpt, silent)
       }
-    GetServiceNodesInfoResponse(result.toArray)
+    GetServiceNodesInfoResponse(result.map(convertServiceNodeInfo(_)).toArray)
   }
 
   @ApiResponse(
@@ -233,6 +231,17 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
           request.external)
       }
     CreateAndGetServiceNodeResponse(result)
+  }
+
+  private def convertServiceNodeInfo(info: ServiceNodeInfo) = {
+    GetServiceNodesInfoResponseServiceNodeInfo(
+      namespace = info.namespace,
+      nodeName = info.nodeName,
+      host = info.host,
+      port = info.port,
+      version = info.version.getOrElse(null),
+      engineRefId = info.engineRefId.getOrElse(null)
+    )
   }
 }
 

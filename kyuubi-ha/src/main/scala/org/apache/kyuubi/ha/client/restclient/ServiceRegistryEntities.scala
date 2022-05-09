@@ -19,9 +19,7 @@ package org.apache.kyuubi.ha.client.restclient
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-import org.apache.kyuubi.ha.client.ServiceNodeInfo
-
-case class EmptyResponse()
+case class DeletePathResponse()
 
 case class CreatePathRequest(@JsonProperty("path") path: String,
                              @JsonProperty("mode") mode: String,
@@ -29,28 +27,40 @@ case class CreatePathRequest(@JsonProperty("path") path: String,
 
 case class CreatePathResponse(@JsonProperty("path") path: String)
 
-case class GetPathDataResponse(data: Array[Byte])
+case class GetPathDataResponse(@JsonProperty("data") data: Array[Byte])
 
-case class GetPathChildrenResponse(children: Array[String])
+case class GetPathChildrenResponse(@JsonProperty("children") children: Array[String])
 
-case class GetPathExistsResponse(exists: Boolean)
+case class GetPathExistsResponse(@JsonProperty("exists") exists: Boolean)
 
-case class GetServerHostResponse(host: String, port: Int)
+case class GetServerHostResponse(@JsonProperty("host") host: String,
+                                 @JsonProperty("port") port: Int)
 
-case class GetEngineByRefIdResponse(host: String, port: Int)
+case class GetEngineByRefIdResponse(@JsonProperty("host") host: String,
+                                    @JsonProperty("port") port: Int)
 
-case class GetServiceNodesInfoResponse(data: Array[ServiceNodeInfo])
+case class GetServiceNodesInfoResponse(@JsonProperty("data") data:
+                                       Array[GetServiceNodesInfoResponseServiceNodeInfo])
 
-case class RegisterServiceRequest(namespace: String,
-                                        connectionUrl: String,
-                                        version: String = null,
-                                        external: Boolean = false)
+case class GetServiceNodesInfoResponseServiceNodeInfo(
+                            @JsonProperty("namespace") namespace: String,
+                            @JsonProperty("nodeName") nodeName: String,
+                            @JsonProperty("host") host: String,
+                            @JsonProperty("port") port: Int,
+                            @JsonProperty("version") version: String,
+                            @JsonProperty("engineRefId") engineRefId: String) {
+}
+
+case class RegisterServiceRequest(@JsonProperty("namespace") namespace: String,
+                                  @JsonProperty("connectionUrl") connectionUrl: String,
+                                  @JsonProperty("version") version: String = null,
+                                  @JsonProperty("external") external: Boolean = false)
 
 case class RegisterServiceResponse()
 
-case class CreateAndGetServiceNodeRequest(namespace: String,
-                                          instance: String,
-                                  version: String = null,
-                                  external: Boolean = false)
+case class CreateAndGetServiceNodeRequest(@JsonProperty("namespace") namespace: String,
+                                          @JsonProperty("instance") instance: String,
+                                          @JsonProperty("version") version: String = null,
+                                          @JsonProperty("external") external: Boolean = false)
 
-case class CreateAndGetServiceNodeResponse(path: String)
+case class CreateAndGetServiceNodeResponse(@JsonProperty("path") path: String)
