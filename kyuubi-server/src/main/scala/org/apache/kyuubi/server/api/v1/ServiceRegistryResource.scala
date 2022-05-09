@@ -194,6 +194,7 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
   @Path("/registerService")
   @Consumes(Array(MediaType.APPLICATION_JSON))
   def registerService(request: RegisterServiceRequest): RegisterServiceResponse = {
+    info(s"Registering external service: $request")
     val refId = Option(request.refId)
     val version = Option(request.version)
     DiscoveryClientProvider.withDiscoveryClient(conf) {

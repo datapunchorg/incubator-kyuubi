@@ -212,7 +212,7 @@ private[kyuubi] class EngineRef(
         }
         engineRef = discoveryClient.getEngineByRefId(engineSpace, engineRefId)
         if (engineRef.isEmpty) {
-          Thread.sleep(3000)
+          Thread.sleep(10000)
         }
       }
       engineRef.get
