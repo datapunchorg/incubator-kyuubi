@@ -1475,4 +1475,11 @@ object KyuubiConf {
       .version("1.6.0")
       .stringConf
       .createWithDefault("org.apache.kyuubi.ha.client.zookeeper.ZookeeperDiscoveryClient")
+
+  val DISCOVERY_CLIENT_REST_URL: ConfigEntry[String] =
+    buildConf("kyuubi.service.discovery.client.rest.url")
+      .doc("Connection url for REST based service discovery client.")
+      .version("1.6.0")
+      .stringConf
+      .createWithDefault("http://localhost:8080/api/v1")
 }

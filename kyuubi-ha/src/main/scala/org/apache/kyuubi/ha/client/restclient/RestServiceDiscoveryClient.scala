@@ -25,12 +25,15 @@ import java.util.concurrent.TimeUnit
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+
 import org.apache.kyuubi.Logging
 import org.apache.kyuubi.config.KyuubiConf
 import org.apache.kyuubi.ha.client.{DiscoveryClient, ServiceDiscovery, ServiceNodeInfo}
 
-class RestServiceDiscoveryClient(val rootUrl: String = "http://localhost:8080/api/v1")
+class RestServiceDiscoveryClient(conf: KyuubiConf)
   extends DiscoveryClient with Logging {
+
+  val rootUrl: String = conf.get(KyuubiConf.DISCOVERY_CLIENT_REST_URL)
 
   private val objectMapper = new ObjectMapper()
 
@@ -264,8 +267,9 @@ class RestServiceDiscoveryClient(val rootUrl: String = "http://localhost:8080/ap
 
 object RestServiceDiscoveryClient extends Logging {
   def main(args: Array[String]): Unit = {
-    val path = "/path5"
-    val client = new RestServiceDiscoveryClient("http://localhost:8080/api/v1")
+    val conf = new KyuubiConf()
+    val path = "/path1"
+    val client = new RestServiceDiscoveryClient(conf)
     val createPathResponse = client.create(path, "PERSISTENT")
     info(createPathResponse)
     val getPathDataResponse = client.getData(path)
