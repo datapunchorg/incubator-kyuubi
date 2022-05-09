@@ -182,18 +182,21 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
 
   override def registerService(conf: KyuubiConf, namespace: String,
                                serviceDiscovery: ServiceDiscovery,
+                               refId: Option[String],
                                version: Option[String], external: Boolean): Unit = {
-    registerServiceSimple(conf, namespace, serviceDiscovery.fe.connectionUrl, version, external)
+    registerExternalService(conf, namespace, serviceDiscovery.fe.connectionUrl, refId, version)
   }
 
-  override def registerServiceSimple(conf: KyuubiConf, namespace: String,
-                                     connectionUrl: String,
-                                     version: Option[String], external: Boolean): Unit = {
+  override def registerExternalService(conf: KyuubiConf, namespace: String,
+                                             connectionUrl: String,
+                                             refId: Option[String],
+                                             version: Option[String]): Unit = {
     val url = s"$rootUrl/serviceRegistry/registerService"
     val requestObject = new RegisterServiceRequest(namespace = namespace,
       connectionUrl = connectionUrl,
+      refId = refId.getOrElse(null),
       version = version.getOrElse(null),
-      external = external)
+      external = true)
     val responseBody = postHttp(url, requestObject)
     objectMapper.readValue(responseBody, classOf[RegisterServiceResponse])
   }
@@ -213,12 +216,16 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
     true
   }
 
-  override def createAndGetServiceNode(conf: KyuubiConf, namespace: String,
-                                       instance: String, version: Option[String],
+  override def createAndGetServiceNode(conf: KyuubiConf,
+                                       namespace: String,
+                                       instance: String,
+                                       refId: Option[String],
+                                       version: Option[String],
                                        external: Boolean): String = {
     val url = s"$rootUrl/serviceRegistry/createAndGetServiceNode"
     val requestObject = new CreateAndGetServiceNodeRequest(namespace = namespace,
       instance = instance,
+      refId = refId.getOrElse(null),
       version = version.getOrElse(null),
       external = external)
     val responseBody = postHttp(url, requestObject)
@@ -281,11 +288,11 @@ object RestServiceDiscoveryClient extends Logging {
     client.delete(path, true)
 
     val namespace = "/ns1"
-    client.registerServiceSimple(new KyuubiConf(), namespace,
-      "localhost:9999", None, true)
+    client.registerExternalService(new KyuubiConf(), namespace,
+      "localhost:9999", Some("refId1"), None)
 
     client.createAndGetServiceNode(new KyuubiConf(), namespace,
-      "instance1", None, true)
+      "instance1", Some("ref1"), None, true)
 
     val serverHost = client.getServerHost(namespace)
     info(serverHost)

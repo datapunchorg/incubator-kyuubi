@@ -46,7 +46,6 @@ import org.apache.kyuubi.KyuubiException
 import org.apache.kyuubi.KyuubiSQLException
 import org.apache.kyuubi.Logging
 import org.apache.kyuubi.config.KyuubiConf
-import org.apache.kyuubi.ha.HighAvailabilityConf.HA_ZK_ENGINE_REF_ID
 import org.apache.kyuubi.ha.HighAvailabilityConf.HA_ZK_NODE_TIMEOUT
 import org.apache.kyuubi.ha.HighAvailabilityConf.HA_ZK_PUBLISH_CONFIGS
 import org.apache.kyuubi.ha.client.DiscoveryClient
@@ -207,11 +206,12 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
       conf: KyuubiConf,
       namespace: String,
       serviceDiscovery: ServiceDiscovery,
+      refId: Option[String],
       version: Option[String] = None,
       external: Boolean = false): Unit = {
     val instance = serviceDiscovery.fe.connectionUrl
     val watcher = new DeRegisterWatcher(instance, serviceDiscovery)
-    serviceNode = createPersistentNode(conf, namespace, instance, version, external)
+    serviceNode = createPersistentNode(conf, namespace, instance, refId, version, external)
     // Set a watch on the serviceNode
     if (zkClient.checkExists
         .usingWatcher(watcher.asInstanceOf[Watcher]).forPath(serviceNode.getActualPath) == null) {
@@ -221,15 +221,16 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
     }
   }
 
-  def registerServiceSimple(
+  def registerExternalService(
                        conf: KyuubiConf,
                        namespace: String,
                        connectionUrl: String,
-                       version: Option[String] = None,
-                       external: Boolean = false): Unit = {
+                       refId: Option[String],
+                       version: Option[String] = None): Unit = {
     val instance = connectionUrl
     info(s"Creating zookeeper persistent node, namespace: $namespace, instance: $instance")
-    serviceNode = createPersistentNode(conf, namespace, instance, version, external)
+    val external = true
+    serviceNode = createPersistentNode(conf, namespace, instance, refId, version, external)
   }
 
   def deregisterService(): Unit = {
@@ -265,9 +266,10 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
       conf: KyuubiConf,
       namespace: String,
       instance: String,
+      refId: Option[String],
       version: Option[String] = None,
       external: Boolean = false): String = {
-    createPersistentNode(conf, namespace, instance, version, external).getActualPath
+    createPersistentNode(conf, namespace, instance, refId, version, external).getActualPath
   }
 
   @VisibleForTesting
@@ -320,6 +322,7 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
       conf: KyuubiConf,
       namespace: String,
       instance: String,
+      refId: Option[String],
       version: Option[String] = None,
       external: Boolean = false): PersistentNode = {
     val ns = ZKPaths.makePath(null, namespace)
@@ -335,7 +338,7 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
         throw new KyuubiException(s"Failed to create namespace '$ns'", e)
     }
 
-    val session = conf.get(HA_ZK_ENGINE_REF_ID)
+    val session = refId
       .map(refId => s"refId=$refId;").getOrElse("")
     val pathPrefix = ZKPaths.makePath(
       namespace,

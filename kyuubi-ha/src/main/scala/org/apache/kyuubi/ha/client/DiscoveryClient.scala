@@ -126,6 +126,7 @@ trait DiscoveryClient extends Logging {
       conf: KyuubiConf,
       namespace: String,
       serviceDiscovery: ServiceDiscovery,
+      refId: Option[String],
       version: Option[String] = None,
       external: Boolean = false): Unit
 
@@ -135,15 +136,13 @@ trait DiscoveryClient extends Logging {
    * @param namespace the path to register instance
    * @param connectionUrl connection url
    * @param version kyuubi version
-   * @param external if true,
-   *                 the service info will not be automatically deleted upon client's disconnect
    */
-  def registerServiceSimple(
+  def registerExternalService(
                        conf: KyuubiConf,
                        namespace: String,
                        connectionUrl: String,
-                       version: Option[String] = None,
-                       external: Boolean = false): Unit
+                       refId: Option[String],
+                       version: Option[String] = None): Unit
 
   /**
    * Deregister Kyuubi instance on discovery service.
@@ -168,6 +167,7 @@ trait DiscoveryClient extends Logging {
       conf: KyuubiConf,
       namespace: String,
       instance: String,
+      refId: Option[String],
       version: Option[String] = None,
       external: Boolean = false): String
 

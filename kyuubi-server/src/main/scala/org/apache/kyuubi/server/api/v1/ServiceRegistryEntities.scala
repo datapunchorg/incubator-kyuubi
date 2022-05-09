@@ -81,6 +81,7 @@ object GetServiceNodesInfoResponseServiceNodeInfo {
 
 case class RegisterServiceRequest(@JsonProperty("namespace") namespace: String,
                                   @JsonProperty("connectionUrl") connectionUrl: String,
+                                  @JsonProperty("refId") refId: String,
                                   @JsonProperty("version") version: String = null,
                                   @JsonProperty("external") external: Boolean = false)
 
@@ -88,6 +89,7 @@ case class RegisterServiceResponse()
 
 case class CreateAndGetServiceNodeRequest(@JsonProperty("namespace") namespace: String,
                                           @JsonProperty("instance") instance: String,
+                                          @JsonProperty("refId") refId: String,
                                           @JsonProperty("version") version: String = null,
                                           @JsonProperty("external") external: Boolean = false)
 
