@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import org.apache.kyuubi.Logging
 import org.apache.kyuubi.config.KyuubiConf
-import org.apache.kyuubi.ha.HighAvailabilityConf
 import org.apache.kyuubi.ha.HighAvailabilityConf._
 import org.apache.kyuubi.service.{AbstractService, FrontendService}
 
@@ -58,7 +57,7 @@ abstract class ServiceDiscovery(
   }
 
   override def start(): Unit = {
-    val refId = conf.get(HighAvailabilityConf.HA_ZK_ENGINE_REF_ID)
+    val refId = conf.get(HA_ZK_ENGINE_REF_ID)
     discoveryClient.registerService(conf, namespace, this, refId)
     super.start()
   }

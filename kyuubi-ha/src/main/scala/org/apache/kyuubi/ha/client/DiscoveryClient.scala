@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit
 
 import org.apache.kyuubi.Logging
 import org.apache.kyuubi.config.KyuubiConf
+import org.apache.kyuubi.ha.HighAvailabilityConf
 
 /**
  * A collection of apis that discovery client need implement.
@@ -127,8 +128,18 @@ trait DiscoveryClient extends Logging {
       namespace: String,
       serviceDiscovery: ServiceDiscovery,
       refId: Option[String],
-      version: Option[String] = None,
-      external: Boolean = false): Unit
+      version: Option[String],
+      external: Boolean): Unit
+
+  def registerService(
+                       conf: KyuubiConf,
+                       namespace: String,
+                       serviceDiscovery: ServiceDiscovery,
+                       version: Option[String] = None,
+                       external: Boolean = false): Unit = {
+    val refId = conf.get(HighAvailabilityConf.HA_ZK_ENGINE_REF_ID)
+    registerService(conf, namespace, serviceDiscovery, refId, version, external)
+  }
 
   /**
    * Register Kyuubi instance on discovery service.
@@ -168,8 +179,18 @@ trait DiscoveryClient extends Logging {
       namespace: String,
       instance: String,
       refId: Option[String],
-      version: Option[String] = None,
-      external: Boolean = false): String
+      version: Option[String],
+      external: Boolean): String
+
+  def createAndGetServiceNode(
+                               conf: KyuubiConf,
+                               namespace: String,
+                               instance: String,
+                               version: Option[String] = None,
+                               external: Boolean = false): String = {
+    val refId = conf.get(HighAvailabilityConf.HA_ZK_ENGINE_REF_ID)
+    createAndGetServiceNode(conf, namespace, instance, refId, version, external)
+  }
 
   /**
    * Create a node to store engine secret.

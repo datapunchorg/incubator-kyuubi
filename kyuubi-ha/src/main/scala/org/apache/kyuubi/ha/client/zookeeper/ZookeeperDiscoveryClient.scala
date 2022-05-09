@@ -207,8 +207,8 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
       namespace: String,
       serviceDiscovery: ServiceDiscovery,
       refId: Option[String],
-      version: Option[String] = None,
-      external: Boolean = false): Unit = {
+      version: Option[String],
+      external: Boolean): Unit = {
     val instance = serviceDiscovery.fe.connectionUrl
     val watcher = new DeRegisterWatcher(instance, serviceDiscovery)
     serviceNode = createPersistentNode(conf, namespace, instance, refId, version, external)
@@ -267,8 +267,8 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
       namespace: String,
       instance: String,
       refId: Option[String],
-      version: Option[String] = None,
-      external: Boolean = false): String = {
+      version: Option[String],
+      external: Boolean): String = {
     createPersistentNode(conf, namespace, instance, refId, version, external).getActualPath
   }
 
