@@ -23,7 +23,7 @@ jobs:
 
       - name: Build the Docker image
         run: |
-          mvn clean package -DskipTests
+          ./build/dist
           ls -lt target
 
       - name: Log in to the Container registry
