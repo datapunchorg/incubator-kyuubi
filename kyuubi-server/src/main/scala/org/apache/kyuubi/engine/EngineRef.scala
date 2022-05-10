@@ -222,6 +222,7 @@ private[kyuubi] class EngineRef(
           Thread.sleep(10000)
         }
       }
+      info(s"Engine ready ${engineRef.get}, engineRefId: $engineRefId")
       engineRef.get
     } finally {
       // we must close the process builder whether session open is success or failure since

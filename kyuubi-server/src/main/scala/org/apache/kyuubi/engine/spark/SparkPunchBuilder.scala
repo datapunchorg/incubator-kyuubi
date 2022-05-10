@@ -23,25 +23,22 @@ import java.net.http.{HttpClient, HttpRequest}
 import java.net.http.HttpResponse.BodyHandlers
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
-import javax.net.ssl.{SSLContext, TrustManager, X509TrustManager}
 
+import javax.net.ssl.{SSLContext, TrustManager, X509TrustManager}
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-
 import org.apache.kyuubi.{KyuubiException, Logging}
 import org.apache.kyuubi.config.KyuubiConf
 import org.apache.kyuubi.engine.ProcBuilder
 import org.apache.kyuubi.operation.log.OperationLog
+import org.apache.kyuubi.util.HttpUtils
 
 class SparkPunchBuilder(
     override val proxyUser: String,
     override val conf: KyuubiConf,
     override val extraEngineLog: Option[OperationLog] = None,
     val restApiUrl: String) extends ProcBuilder with Logging {
-  private val objectMapper = new ObjectMapper()
-
-  objectMapper.registerModule(DefaultScalaModule)
 
   private val user = conf.get(KyuubiConf.SPARK_PUNCH_REST_API_USER)
   private val password = conf.get(KyuubiConf.SPARK_PUNCH_REST_API_PASSWORD)
@@ -108,48 +105,10 @@ class SparkPunchBuilder(
       executor = ExecutorSpec(cores = 1L, memory = "1", instances = 3))
 
     val url = s"$restApiUrl/submissions"
-    val responseBody = postHttp(url, submission, user, password)
+    val responseBody = HttpUtils.postHttp(url, submission, user, password)
     info(s"Spark submission response: $responseBody")
 
     new SparkPunchBuilderProcess()
-  }
-
-  private def postHttp[T](url: String, requestObject: T, user: String, password: String) = {
-    val props = System.getProperties()
-    props.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true")
-    val trustManager: TrustManager = new X509TrustManager {
-      override def checkClientTrusted(
-          x509Certificates: Array[X509Certificate],
-          s: String): Unit = {}
-      override def checkServerTrusted(
-          x509Certificates: Array[X509Certificate],
-          s: String): Unit = {}
-      override def getAcceptedIssuers: Array[X509Certificate] = {
-        null
-      }
-    }
-    val sslContext: SSLContext = SSLContext.getInstance("TLS")
-    sslContext.init(null, Array(trustManager), new SecureRandom())
-
-    val requestBody = objectMapper.writeValueAsString(requestObject)
-    val client = HttpClient.newBuilder()
-      .sslContext(sslContext)
-      .authenticator(new Authenticator() {
-        override def getPasswordAuthentication: PasswordAuthentication = {
-          new PasswordAuthentication(user, password.toCharArray());
-        }
-      })
-      .build()
-    val request = HttpRequest.newBuilder()
-      .uri(new URI(url))
-      .header("Content-Type", "application/json")
-      .header("Accept", "application/json")
-      .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-      .build()
-    info(s"Posting to url $url: $requestBody")
-    val responseBody = client.send(request, BodyHandlers.ofString()).body()
-    info(s"Got response from url $url: $responseBody")
-    responseBody
   }
 }
 

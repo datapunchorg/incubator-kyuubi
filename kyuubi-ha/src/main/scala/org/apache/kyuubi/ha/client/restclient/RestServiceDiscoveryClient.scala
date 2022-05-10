@@ -25,10 +25,10 @@ import java.util.concurrent.TimeUnit
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-
 import org.apache.kyuubi.Logging
 import org.apache.kyuubi.config.KyuubiConf
 import org.apache.kyuubi.ha.client.{DiscoveryClient, ServiceDiscovery, ServiceNodeInfo}
+import org.apache.kyuubi.util.HttpUtils
 
 class RestServiceDiscoveryClient(conf: KyuubiConf)
   extends DiscoveryClient with Logging {
@@ -55,7 +55,7 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
   override def create(path: String, mode: String, createParent: Boolean): String = {
     val url = s"$rootUrl/serviceRegistry/createPath"
     val requestObject = new CreatePathRequest(path = path, mode = mode, createParent = createParent)
-    val responseBody = postHttp(url, requestObject)
+    val responseBody = HttpUtils.postHttp(url, requestObject)
     val responseObject = objectMapper.readValue(responseBody, classOf[CreatePathResponse])
     responseObject.path
   }
@@ -65,7 +65,7 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
    */
   override def getData(path: String): Array[Byte] = {
     val url = s"$rootUrl/serviceRegistry/getPathData?path=${encodeQueryParameter(path)}"
-    val responseBody = getHttp(url)
+    val responseBody = HttpUtils.getHttp(url)
     val responseObject = objectMapper.readValue(responseBody, classOf[GetPathDataResponse])
     responseObject.data
   }
@@ -77,7 +77,7 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
    */
   override def getChildren(path: String): List[String] = {
     val url = s"$rootUrl/serviceRegistry/getPathChildren?path=${encodeQueryParameter(path)}"
-    val responseBody = getHttp(url)
+    val responseBody = HttpUtils.getHttp(url)
     val responseObject = objectMapper.readValue(responseBody, classOf[GetPathChildrenResponse])
     responseObject.children.toList
   }
@@ -87,7 +87,7 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
    */
   override def pathExists(path: String): Boolean = {
     val url = s"$rootUrl/serviceRegistry/getPathExists?path=${encodeQueryParameter(path)}"
-    val responseBody = getHttp(url)
+    val responseBody = HttpUtils.getHttp(url)
     val responseObject = objectMapper.readValue(responseBody, classOf[GetPathExistsResponse])
     responseObject.exists
   }
@@ -108,7 +108,7 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
   override def delete(path: String, deleteChildren: Boolean): Unit = {
     val url = s"$rootUrl/serviceRegistry/deletePath?path=${encodeQueryParameter(path)}" +
       s"&deleteChildren=${deleteChildren}"
-    val responseBody = getHttp(url)
+    val responseBody = HttpUtils.getHttp(url)
     objectMapper.readValue(responseBody, classOf[DeletePathResponse])
   }
 
@@ -136,7 +136,7 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
    */
   override def getServerHost(namespace: String): Option[(String, Int)] = {
     val url = s"$rootUrl/serviceRegistry/getServerHost?namespace=${encodeQueryParameter(namespace)}"
-    val responseBody = getHttp(url)
+    val responseBody = HttpUtils.getHttp(url)
     val responseObject = objectMapper.readValue(responseBody, classOf[GetServerHostResponse])
     if (responseObject.host == null) {
       None
@@ -156,7 +156,7 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
     val url = s"$rootUrl/serviceRegistry/getEngineByRefId?" +
       s"namespace=${encodeQueryParameter(namespace)}" +
       s"&engineRefId=${encodeQueryParameter(engineRefId)}"
-    val responseBody = getHttp(url)
+    val responseBody = HttpUtils.getHttp(url)
     val responseObject = objectMapper.readValue(responseBody, classOf[GetEngineByRefIdResponse])
     if (responseObject.host == null) {
       None
@@ -173,7 +173,7 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
       s"namespace=${encodeQueryParameter(namespace)}" +
       s"&sizeOpt=${sizeOpt.getOrElse(0)}" +
       s"&silent=${silent}"
-    val responseBody = getHttp(url)
+    val responseBody = HttpUtils.getHttp(url)
     val responseObject = objectMapper.readValue(responseBody, classOf[GetServiceNodesInfoResponse])
     responseObject.data.map(
       GetServiceNodesInfoResponseServiceNodeInfo.convert(_)).toList
@@ -186,6 +186,9 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
       refId: Option[String],
       version: Option[String],
       external: Boolean): Unit = {
+    info(s"registerService: namespace: $namespace, " +
+      s"connectionUrl: ${serviceDiscovery.fe.connectionUrl}, " +
+      s"refId: $refId, version: $version, external: $external")
     registerExternalService(conf, namespace, serviceDiscovery.fe.connectionUrl, refId, version)
   }
 
@@ -195,6 +198,9 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
       connectionUrl: String,
       refId: Option[String],
       version: Option[String]): Unit = {
+    info(s"registerExternalService: namespace: $namespace, " +
+      s"connectionUrl: $connectionUrl, " +
+      s"refId: $refId, version: $version")
     val url = s"$rootUrl/serviceRegistry/registerService"
     val requestObject = new RegisterServiceRequest(
       namespace = namespace,
@@ -202,7 +208,7 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
       refId = refId.getOrElse(null),
       version = version.getOrElse(null),
       external = true)
-    val responseBody = postHttp(url, requestObject)
+    val responseBody = HttpUtils.postHttp(url, requestObject)
     objectMapper.readValue(responseBody, classOf[RegisterServiceResponse])
   }
 
@@ -228,6 +234,9 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
       refId: Option[String],
       version: Option[String],
       external: Boolean): String = {
+    info(s"createAndGetServiceNode: namespace: $namespace, " +
+      s"instance: $instance, " +
+      s"refId: $refId, version: $version, external: $external")
     val url = s"$rootUrl/serviceRegistry/createAndGetServiceNode"
     val requestObject = new CreateAndGetServiceNodeRequest(
       namespace = namespace,
@@ -235,7 +244,7 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
       refId = refId.getOrElse(null),
       version = version.getOrElse(null),
       external = external)
-    val responseBody = postHttp(url, requestObject)
+    val responseBody = HttpUtils.postHttp(url, requestObject)
     val responseObject =
       objectMapper.readValue(responseBody, classOf[CreateAndGetServiceNodeResponse])
     responseObject.path
@@ -247,34 +256,6 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
       initData: String,
       useProtection: Boolean): Unit = {
     warn(s"startSecretNode not implemented in ${this.getClass.getSimpleName}")
-  }
-
-  private def getHttp(url: String) = {
-    val client = HttpClient.newHttpClient
-    val request = HttpRequest.newBuilder()
-      .uri(new URI(url))
-      .header("Accept", "application/json")
-      .GET()
-      .build()
-    info(s"Getting url $url")
-    val responseBody = client.send(request, BodyHandlers.ofString()).body()
-    info(s"Got response from url $url: $responseBody")
-    responseBody
-  }
-
-  private def postHttp[T](url: String, requestObject: T) = {
-    val requestBody = objectMapper.writeValueAsString(requestObject)
-    val client = HttpClient.newHttpClient
-    val request = HttpRequest.newBuilder()
-      .uri(new URI(url))
-      .header("Content-Type", "application/json")
-      .header("Accept", "application/json")
-      .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-      .build()
-    info(s"Posting to url $url: $requestBody")
-    val responseBody = client.send(request, BodyHandlers.ofString()).body()
-    info(s"Got response from url $url: $responseBody")
-    responseBody
   }
 
   private def encodeQueryParameter(str: String) = {
