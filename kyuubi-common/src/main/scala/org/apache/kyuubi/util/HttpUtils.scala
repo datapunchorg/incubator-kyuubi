@@ -22,10 +22,10 @@ import java.net.http.{HttpClient, HttpRequest}
 import java.net.http.HttpResponse.BodyHandlers
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
+import javax.net.ssl.{SSLContext, TrustManager, X509TrustManager}
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import javax.net.ssl.{SSLContext, TrustManager, X509TrustManager}
 
 import org.apache.kyuubi.Logging
 
@@ -83,12 +83,12 @@ object HttpUtils extends Logging {
   private def createSSLContext() = {
     val trustManager: TrustManager = new X509TrustManager {
       override def checkClientTrusted(
-                                       x509Certificates: Array[X509Certificate],
-                                       s: String): Unit = {}
+          x509Certificates: Array[X509Certificate],
+          s: String): Unit = {}
 
       override def checkServerTrusted(
-                                       x509Certificates: Array[X509Certificate],
-                                       s: String): Unit = {}
+          x509Certificates: Array[X509Certificate],
+          s: String): Unit = {}
 
       override def getAcceptedIssuers: Array[X509Certificate] = {
         null
