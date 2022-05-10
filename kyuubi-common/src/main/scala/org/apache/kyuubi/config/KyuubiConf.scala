@@ -154,6 +154,12 @@ case class KyuubiConf(loadSysDefault: Boolean = true) extends Logging {
     serverOnlyConfEntries.foreach(cloned.unset)
     cloned
   }
+
+  def getLocalFrontendRestApiRootUrl(): String = {
+    val server = Utils.getLocalFqdn()
+    val port = this.get(KyuubiConf.FRONTEND_REST_BIND_PORT)
+    s"http://$server:$port/api/v1"
+  }
 }
 
 /**
@@ -1483,7 +1489,7 @@ object KyuubiConf {
       .doc("Connection url for REST based service discovery client.")
       .version("1.6.0")
       .stringConf
-      .createWithDefault("http://localhost:8080/api/v1")
+      .createWithDefault("")
 
   val SPARK_PUNCH_REST_API_URL: ConfigEntry[String] =
     buildConf("kyuubi.engine.spark.punch.rest.api.url")

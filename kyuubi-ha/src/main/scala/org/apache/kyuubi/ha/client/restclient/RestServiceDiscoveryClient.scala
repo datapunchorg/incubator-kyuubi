@@ -31,7 +31,14 @@ import org.apache.kyuubi.util.HttpUtils
 class RestServiceDiscoveryClient(conf: KyuubiConf)
   extends DiscoveryClient with Logging {
 
-  val rootUrl: String = conf.get(KyuubiConf.DISCOVERY_CLIENT_REST_URL)
+  val rootUrl: String = {
+    var value = conf.get(KyuubiConf.DISCOVERY_CLIENT_REST_URL)
+    if (value == null || value.isEmpty) {
+      value = conf.getLocalFrontendRestApiRootUrl()
+    }
+    info(s"Use rest discovery client: $value")
+    value
+  }
 
   private val objectMapper = new ObjectMapper()
 

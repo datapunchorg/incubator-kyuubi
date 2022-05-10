@@ -70,6 +70,13 @@ class SparkPunchBuilder(
 
     var allConf = conf.getAll
 
+    if (!allConf.contains(KyuubiConf.DISCOVERY_CLIENT_REST_URL.key)) {
+      val key = KyuubiConf.DISCOVERY_CLIENT_REST_URL.key
+      val value = conf.getLocalFrontendRestApiRootUrl()
+      allConf += (key -> value)
+      info(s"Add spark conf: $key=$value")
+    }
+
     /**
      * Converts kyuubi configs to configs that Spark could identify.
      * - If the key is start with `spark.`, keep it AS IS as it is a Spark Conf
