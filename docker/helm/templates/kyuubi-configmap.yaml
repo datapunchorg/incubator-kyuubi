@@ -49,8 +49,7 @@ data:
     kyuubi.frontend.bind.port={{ .Values.server.bind.port }}
     kyuubi.zookeeper.embedded.client.port.address localhost
     kyuubi.frontend.rest.bind.host 0.0.0.0
-    kyuubi.frontend.rest.bind.port 8080
-    kyuubi.service.discovery.client.rest.url kyuubi-server-0:8080
+    kyuubi.service.discovery.client.rest.url kyuubi-server-0:10099
     kyuubi.engine.spark.punch.rest.api.url https://aad36e6c769f74521b8e1651e2940da7-490039176.us-west-1.elb.amazonaws.com/sparkapi/v1
     kyuubi.engine.spark.punch.rest.api.user user1
     kyuubi.engine.spark.punch.rest.api.password password1

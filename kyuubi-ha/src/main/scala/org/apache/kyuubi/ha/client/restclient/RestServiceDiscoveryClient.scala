@@ -35,8 +35,9 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
     var value = conf.get(KyuubiConf.DISCOVERY_CLIENT_REST_URL)
     if (value == null || value.isEmpty) {
       value = conf.getLocalFrontendRestApiRootUrl()
+      info(s"Get local frontend rest api root url: $value")
     }
-    info(s"Use rest discovery client: $value")
+    info(s"Use rest discovery client url: $value")
     value
   }
 

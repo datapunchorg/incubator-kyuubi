@@ -25,10 +25,19 @@ object SparkBuilderUtils extends Logging {
   def addExtraKyuubiConf(conf: KyuubiConf): Map[String, String] = {
     var allConf: Map[String, String] = conf.getAll
 
-    val key = KyuubiConf.DISCOVERY_CLIENT_CLASS.key
-    val value = "org.apache.kyuubi.ha.client.restclient.RestServiceDiscoveryClient"
-    allConf += (key -> value)
-    info(s"Add conf to Spark: $key=$value")
+    {
+      val key = KyuubiConf.DISCOVERY_CLIENT_CLASS.key
+      val value = "org.apache.kyuubi.ha.client.restclient.RestServiceDiscoveryClient"
+      allConf += (key -> value)
+      info(s"Add conf to Spark: $key=$value")
+    }
+
+    {
+      val key = KyuubiConf.FRONTEND_REST_BIND_PORT.key
+      val value = conf.get(KyuubiConf.FRONTEND_REST_BIND_PORT).toString
+      allConf += (key -> value)
+      info(s"Add conf to Spark: $key=$value")
+    }
 
     if (!allConf.contains(KyuubiConf.DISCOVERY_CLIENT_REST_URL.key)) {
       val key = KyuubiConf.DISCOVERY_CLIENT_REST_URL.key

@@ -32,9 +32,9 @@ spec:
       port: {{ .Values.server.bind.port }}
       protocol: TCP
     - name: http-rest
-      nodePort: 30010
-      port: 8080
-      targetPort: 8080
+      nodePort: 30099
+      port: 10099
+      targetPort: 10099
       protocol: TCP
   type: {{ .Values.service.type }}
   selector:
