@@ -29,7 +29,7 @@ spec:
     matchLabels:
       app: {{ template "kyuubi.name" . }}
       release: {{ .Release.Name }}
-  serviceName: kyuubi
+  serviceName: kyuubi-svc
   template:
     metadata:
       labels:

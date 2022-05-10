@@ -291,7 +291,7 @@ object Utils extends Logging {
 
   // Copied and modified from https://github.com/uber/RemoteShuffleService/blob/master/
   // src/main/java/com/uber/rss/util/NetworkUtils.java
-  def getLocalHostName: String =
+  def getLocalHostName(): String =
     try {
       val env = System.getenv
       if (env.containsKey("COMPUTERNAME")) env.get("COMPUTERNAME")
