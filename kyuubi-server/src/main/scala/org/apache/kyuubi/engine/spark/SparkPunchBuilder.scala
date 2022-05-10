@@ -66,40 +66,7 @@ class SparkPunchBuilder(
   override def clusterManager(): Option[String] = Some("PUNCH_REST_API")
 
   override def start: Process = synchronized {
-    var sparkConf = Map[String, String]()
-
-    var allConf = conf.getAll
-
-    {
-      val key = KyuubiConf.DISCOVERY_CLIENT_CLASS.key
-      val value = "org.apache.kyuubi.ha.client.restclient.RestServiceDiscoveryClient"
-      allConf += (key -> value)
-      info(s"Add conf to Spark: $key=$value")
-    }
-    if (!allConf.contains(KyuubiConf.DISCOVERY_CLIENT_REST_URL.key)) {
-      val key = KyuubiConf.DISCOVERY_CLIENT_REST_URL.key
-      val value = conf.getLocalFrontendRestApiRootUrl()
-      allConf += (key -> value)
-      info(s"Add conf to Spark: $key=$value")
-    }
-
-    /**
-     * Converts kyuubi configs to configs that Spark could identify.
-     * - If the key is start with `spark.`, keep it AS IS as it is a Spark Conf
-     * - If the key is start with `hadoop.`, it will be prefixed with `spark.hadoop.`
-     * - Otherwise, the key will be added a `spark.` prefix
-     */
-    allConf.foreach { case (k, v) =>
-      val newKey =
-        if (k.startsWith("spark.")) {
-          k
-        } else if (k.startsWith("hadoop.")) {
-          "spark.hadoop." + k
-        } else {
-          "spark." + k
-        }
-      sparkConf += (newKey -> v)
-    }
+    val sparkConf = SparkBuilderUtils.generateSparkConf(conf)
 
     val driverCores = conf.get(KyuubiConf.SPARK_PUNCH_SQL_ENGINE_DRIVER_CORES)
     val driverMemory = conf.get(KyuubiConf.SPARK_PUNCH_SQL_ENGINE_DRIVER_MEMORY)
