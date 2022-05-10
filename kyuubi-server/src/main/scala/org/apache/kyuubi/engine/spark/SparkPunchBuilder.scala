@@ -18,16 +18,9 @@
 package org.apache.kyuubi.engine.spark
 
 import java.io.{InputStream, OutputStream}
-import java.net.{Authenticator, PasswordAuthentication, URI}
-import java.net.http.{HttpClient, HttpRequest}
-import java.net.http.HttpResponse.BodyHandlers
-import java.security.SecureRandom
-import java.security.cert.X509Certificate
 
-import javax.net.ssl.{SSLContext, TrustManager, X509TrustManager}
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
+
 import org.apache.kyuubi.{KyuubiException, Logging}
 import org.apache.kyuubi.config.KyuubiConf
 import org.apache.kyuubi.engine.ProcBuilder
