@@ -1489,11 +1489,28 @@ object KyuubiConf {
       .version("1.6.0")
       .stringConf
       .createWithDefault("")
-
+  val SPARK_PUNCH_REST_API_USER: ConfigEntry[String] =
+    buildConf("kyuubi.engine.spark.punch.rest.api.user")
+      .doc("Spark REST API user name to submit application")
+      .version("1.6.0")
+      .stringConf
+      .createWithDefault("")
+  val SPARK_PUNCH_REST_API_PASSWORD: ConfigEntry[String] =
+    buildConf("kyuubi.engine.spark.punch.rest.api.password")
+      .doc("Spark REST API user password to submit application")
+      .version("1.6.0")
+      .stringConf
+      .createWithDefault("")
   val SPARK_PUNCH_SQL_ENGINE_JAR_File: ConfigEntry[String] =
     buildConf("kyuubi.engine.spark.punch.sql.engine.jar.file")
       .doc("Spark jar file for sql engine")
       .version("1.6.0")
       .stringConf
       .createWithDefault("")
+  val SPARK_PUNCH_SQL_ENGINE_JAR_SPARK_VERSION: ConfigEntry[String] =
+    buildConf("kyuubi.engine.spark.punch.sql.engine.jar.spark.version")
+      .doc("Spark version for the jar file for sql engine")
+      .version("1.6.0")
+      .stringConf
+      .createWithDefault("3.1")
 }

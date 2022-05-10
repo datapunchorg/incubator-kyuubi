@@ -42,10 +42,19 @@ class SparkPunchBuilder(override val proxyUser: String,
 
   objectMapper.registerModule(DefaultScalaModule)
 
+  private val user = conf.get(KyuubiConf.SPARK_PUNCH_REST_API_USER)
+  private val password = conf.get(KyuubiConf.SPARK_PUNCH_REST_API_PASSWORD)
+
   private val jarFile = conf.get(KyuubiConf.SPARK_PUNCH_SQL_ENGINE_JAR_File)
   if (jarFile == null || jarFile.isEmpty) {
     throw new KyuubiException(s"Missing value for" +
       s" ${KyuubiConf.SPARK_PUNCH_SQL_ENGINE_JAR_File.key}")
+  }
+
+  private val jarSparkVersion = conf.get(KyuubiConf.SPARK_PUNCH_SQL_ENGINE_JAR_SPARK_VERSION)
+  if (jarSparkVersion == null || jarSparkVersion.isEmpty) {
+    throw new KyuubiException(s"Missing value for" +
+      s" ${KyuubiConf.SPARK_PUNCH_SQL_ENGINE_JAR_SPARK_VERSION.key}")
   }
 
   /**
@@ -90,6 +99,7 @@ class SparkPunchBuilder(override val proxyUser: String,
     val submission = PunchSparkSubmission(
       mainClass = mainClass,
       mainApplicationFile = jarFile,
+      sparkVersion = jarSparkVersion,
       sparkConf = sparkConf,
       arguments = Array(),
       driver = DriverSpec(cores = 1, memory = "1g"),
@@ -97,13 +107,13 @@ class SparkPunchBuilder(override val proxyUser: String,
     )
 
     val url = s"$restApiUrl/submissions"
-    val responseBody = postHttp(url, submission)
-    info(s"Submission response: $responseBody")
+    val responseBody = postHttp(url, submission, user, password)
+    info(s"Spark submission response: $responseBody")
 
     new SparkPunchBuilderProcess()
   }
 
-  private def postHttp[T](url: String, requestObject: T) = {
+  private def postHttp[T](url: String, requestObject: T, user: String, password: String) = {
     val props = System.getProperties()
     props.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true")
     val trustManager: TrustManager = new X509TrustManager {
@@ -125,7 +135,7 @@ class SparkPunchBuilder(override val proxyUser: String,
       .sslContext(sslContext)
       .authenticator(new Authenticator() {
         override def getPasswordAuthentication: PasswordAuthentication = {
-          new PasswordAuthentication("user1", "password1".toCharArray());
+          new PasswordAuthentication(user, password.toCharArray());
         }
       })
       .build()
@@ -169,7 +179,7 @@ class SparkPunchBuilderProcess extends Process {
 
 case class PunchSparkSubmission(@JsonProperty("mainClass") mainClass: String,
                                 @JsonProperty("mainApplicationFile") mainApplicationFile: String,
-                                @JsonProperty("sparkVersion") sparkVersion: String = "3.2",
+                                @JsonProperty("sparkVersion") sparkVersion: String,
                                 @JsonProperty("arguments") arguments: Array[String],
                                 @JsonProperty("driver") driver: DriverSpec,
                                 @JsonProperty("executor") executor: ExecutorSpec,
