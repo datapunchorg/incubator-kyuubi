@@ -23,9 +23,10 @@ import org.apache.kyuubi.ha.client.ServiceNodeInfo
 
 case class DeletePathResponse()
 
-case class CreatePathRequest(@JsonProperty("path") path: String,
-                             @JsonProperty("mode") mode: String,
-                             @JsonProperty("createParent") createParent: Boolean = true)
+case class CreatePathRequest(
+    @JsonProperty("path") path: String,
+    @JsonProperty("mode") mode: String,
+    @JsonProperty("createParent") createParent: Boolean = true)
 
 case class CreatePathResponse(@JsonProperty("path") path: String)
 
@@ -35,62 +36,61 @@ case class GetPathChildrenResponse(@JsonProperty("children") children: Array[Str
 
 case class GetPathExistsResponse(@JsonProperty("exists") exists: Boolean)
 
-case class GetServerHostResponse(@JsonProperty("host") host: String,
-                                 @JsonProperty("port") port: Int)
+case class GetServerHostResponse(
+    @JsonProperty("host") host: String,
+    @JsonProperty("port") port: Int)
 
-case class GetEngineByRefIdResponse(@JsonProperty("host") host: String,
-                                    @JsonProperty("port") port: Int)
+case class GetEngineByRefIdResponse(
+    @JsonProperty("host") host: String,
+    @JsonProperty("port") port: Int)
 
-case class GetServiceNodesInfoResponse(@JsonProperty("data") data:
-                                       Array[GetServiceNodesInfoResponseServiceNodeInfo])
+case class GetServiceNodesInfoResponse(
+    @JsonProperty("data") data: Array[GetServiceNodesInfoResponseServiceNodeInfo])
 
 case class GetServiceNodesInfoResponseServiceNodeInfo(
-                           @JsonProperty("namespace") namespace: String,
-                           @JsonProperty("nodeName") nodeName: String,
-                           @JsonProperty("host") host: String,
-                           @JsonProperty("port") port: Int,
-                           @JsonProperty("version") version: String,
-                           @JsonProperty("engineRefId") engineRefId: String) {
-}
+    @JsonProperty("namespace") namespace: String,
+    @JsonProperty("nodeName") nodeName: String,
+    @JsonProperty("host") host: String,
+    @JsonProperty("port") port: Int,
+    @JsonProperty("version") version: String,
+    @JsonProperty("engineRefId") engineRefId: String) {}
 
 object GetServiceNodesInfoResponseServiceNodeInfo {
-  def convert(info: ServiceNodeInfo):
-  GetServiceNodesInfoResponseServiceNodeInfo = {
+  def convert(info: ServiceNodeInfo): GetServiceNodesInfoResponseServiceNodeInfo = {
     GetServiceNodesInfoResponseServiceNodeInfo(
       namespace = info.namespace,
       nodeName = info.nodeName,
       host = info.host,
       port = info.port,
       version = info.version.getOrElse(null),
-      engineRefId = info.engineRefId.getOrElse(null)
-    )
+      engineRefId = info.engineRefId.getOrElse(null))
   }
 
-  def convert(info: GetServiceNodesInfoResponseServiceNodeInfo):
-  ServiceNodeInfo = {
+  def convert(info: GetServiceNodesInfoResponseServiceNodeInfo): ServiceNodeInfo = {
     ServiceNodeInfo(
       namespace = info.namespace,
       nodeName = info.nodeName,
       host = info.host,
       port = info.port,
       version = Option(info.version),
-      engineRefId = Option(info.engineRefId)
-    )
+      engineRefId = Option(info.engineRefId))
   }
 }
 
-case class RegisterServiceRequest(@JsonProperty("namespace") namespace: String,
-                                  @JsonProperty("connectionUrl") connectionUrl: String,
-                                  @JsonProperty("refId") refId: String,
-                                  @JsonProperty("version") version: String = null,
-                                  @JsonProperty("external") external: Boolean = false)
+case class RegisterServiceRequest(
+    @JsonProperty("namespace") namespace: String,
+    @JsonProperty("connectionUrl") connectionUrl: String,
+    @JsonProperty("refId") refId: String,
+    @JsonProperty("version") version: String = null,
+    @JsonProperty("external") external: Boolean = false)
 
 case class RegisterServiceResponse()
 
-case class CreateAndGetServiceNodeRequest(@JsonProperty("namespace") namespace: String,
-                                          @JsonProperty("instance") instance: String,
-                                          @JsonProperty("refId") refId: String,
-                                          @JsonProperty("version") version: String = null,
-                                          @JsonProperty("external") external: Boolean = false)
+case class CreateAndGetServiceNodeRequest(
+    @JsonProperty("namespace") namespace: String,
+    @JsonProperty("instance") instance: String,
+    @JsonProperty("refId") refId: String,
+    @JsonProperty("version") version: String = null,
+    @JsonProperty("external") external: Boolean = false)
 
 case class CreateAndGetServiceNodeResponse(@JsonProperty("path") path: String)

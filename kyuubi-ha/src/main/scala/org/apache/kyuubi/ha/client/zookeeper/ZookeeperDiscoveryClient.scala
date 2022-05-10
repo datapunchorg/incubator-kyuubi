@@ -222,11 +222,11 @@ class ZookeeperDiscoveryClient(conf: KyuubiConf) extends DiscoveryClient {
   }
 
   def registerExternalService(
-                       conf: KyuubiConf,
-                       namespace: String,
-                       connectionUrl: String,
-                       refId: Option[String],
-                       version: Option[String] = None): Unit = {
+      conf: KyuubiConf,
+      namespace: String,
+      connectionUrl: String,
+      refId: Option[String],
+      version: Option[String] = None): Unit = {
     val instance = connectionUrl
     info(s"Creating zookeeper persistent node, namespace: $namespace, instance: $instance")
     val external = true

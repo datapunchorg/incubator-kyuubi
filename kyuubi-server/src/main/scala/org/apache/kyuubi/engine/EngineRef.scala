@@ -20,9 +20,11 @@ package org.apache.kyuubi.engine
 import java.util.concurrent.TimeUnit
 
 import scala.util.Random
+
 import com.codahale.metrics.MetricRegistry
 import com.google.common.annotations.VisibleForTesting
 import org.apache.hadoop.security.UserGroupInformation
+
 import org.apache.kyuubi.{KYUUBI_VERSION, KyuubiSQLException, Logging, Utils}
 import org.apache.kyuubi.config.KyuubiConf
 import org.apache.kyuubi.config.KyuubiConf._

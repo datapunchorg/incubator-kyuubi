@@ -132,11 +132,11 @@ trait DiscoveryClient extends Logging {
       external: Boolean): Unit
 
   def registerService(
-                       conf: KyuubiConf,
-                       namespace: String,
-                       serviceDiscovery: ServiceDiscovery,
-                       version: Option[String] = None,
-                       external: Boolean = false): Unit = {
+      conf: KyuubiConf,
+      namespace: String,
+      serviceDiscovery: ServiceDiscovery,
+      version: Option[String] = None,
+      external: Boolean = false): Unit = {
     val refId = conf.get(HighAvailabilityConf.HA_ZK_ENGINE_REF_ID)
     registerService(conf, namespace, serviceDiscovery, refId, version, external)
   }
@@ -149,11 +149,11 @@ trait DiscoveryClient extends Logging {
    * @param version kyuubi version
    */
   def registerExternalService(
-                       conf: KyuubiConf,
-                       namespace: String,
-                       connectionUrl: String,
-                       refId: Option[String],
-                       version: Option[String] = None): Unit
+      conf: KyuubiConf,
+      namespace: String,
+      connectionUrl: String,
+      refId: Option[String],
+      version: Option[String] = None): Unit
 
   /**
    * Deregister Kyuubi instance on discovery service.
@@ -183,11 +183,11 @@ trait DiscoveryClient extends Logging {
       external: Boolean): String
 
   def createAndGetServiceNode(
-                               conf: KyuubiConf,
-                               namespace: String,
-                               instance: String,
-                               version: Option[String] = None,
-                               external: Boolean = false): String = {
+      conf: KyuubiConf,
+      namespace: String,
+      instance: String,
+      version: Option[String] = None,
+      external: Boolean = false): String = {
     val refId = conf.get(HighAvailabilityConf.HA_ZK_ENGINE_REF_ID)
     createAndGetServiceNode(conf, namespace, instance, refId, version, external)
   }

@@ -23,21 +23,22 @@ import java.net.http.{HttpClient, HttpRequest}
 import java.net.http.HttpResponse.BodyHandlers
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
-
 import javax.net.ssl.{SSLContext, TrustManager, X509TrustManager}
+
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+
 import org.apache.kyuubi.{KyuubiException, Logging}
 import org.apache.kyuubi.config.KyuubiConf
 import org.apache.kyuubi.engine.ProcBuilder
 import org.apache.kyuubi.operation.log.OperationLog
 
-class SparkPunchBuilder(override val proxyUser: String,
-                        override val conf: KyuubiConf,
-                        override val extraEngineLog: Option[OperationLog] = None,
-                        val restApiUrl: String
-                       ) extends ProcBuilder with Logging {
+class SparkPunchBuilder(
+    override val proxyUser: String,
+    override val conf: KyuubiConf,
+    override val extraEngineLog: Option[OperationLog] = None,
+    val restApiUrl: String) extends ProcBuilder with Logging {
   private val objectMapper = new ObjectMapper()
 
   objectMapper.registerModule(DefaultScalaModule)
@@ -78,6 +79,7 @@ class SparkPunchBuilder(override val proxyUser: String,
     var sparkConf = Map[String, String]()
 
     var allConf = conf.getAll
+
     /**
      * Converts kyuubi configs to configs that Spark could identify.
      * - If the key is start with `spark.`, keep it AS IS as it is a Spark Conf
@@ -103,8 +105,7 @@ class SparkPunchBuilder(override val proxyUser: String,
       sparkConf = sparkConf,
       arguments = Array(),
       driver = DriverSpec(cores = 1, memory = "1g"),
-      executor = ExecutorSpec(cores = 1L, memory = "1", instances = 3)
-    )
+      executor = ExecutorSpec(cores = 1L, memory = "1", instances = 3))
 
     val url = s"$restApiUrl/submissions"
     val responseBody = postHttp(url, submission, user, password)
@@ -117,12 +118,12 @@ class SparkPunchBuilder(override val proxyUser: String,
     val props = System.getProperties()
     props.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true")
     val trustManager: TrustManager = new X509TrustManager {
-      override def checkClientTrusted(x509Certificates: Array[X509Certificate],
-                                      s: String): Unit = {
-      }
-      override def checkServerTrusted(x509Certificates: Array[X509Certificate],
-                                      s: String): Unit = {
-      }
+      override def checkClientTrusted(
+          x509Certificates: Array[X509Certificate],
+          s: String): Unit = {}
+      override def checkServerTrusted(
+          x509Certificates: Array[X509Certificate],
+          s: String): Unit = {}
       override def getAcceptedIssuers: Array[X509Certificate] = {
         null
       }
@@ -173,22 +174,23 @@ class SparkPunchBuilderProcess extends Process {
     0
   }
 
-  override def destroy(): Unit = {
-  }
+  override def destroy(): Unit = {}
 }
 
-case class PunchSparkSubmission(@JsonProperty("mainClass") mainClass: String,
-                                @JsonProperty("mainApplicationFile") mainApplicationFile: String,
-                                @JsonProperty("sparkVersion") sparkVersion: String,
-                                @JsonProperty("arguments") arguments: Array[String],
-                                @JsonProperty("driver") driver: DriverSpec,
-                                @JsonProperty("executor") executor: ExecutorSpec,
-                                @JsonProperty("sparkConf") sparkConf: Map[String, String])
+case class PunchSparkSubmission(
+    @JsonProperty("mainClass") mainClass: String,
+    @JsonProperty("mainApplicationFile") mainApplicationFile: String,
+    @JsonProperty("sparkVersion") sparkVersion: String,
+    @JsonProperty("arguments") arguments: Array[String],
+    @JsonProperty("driver") driver: DriverSpec,
+    @JsonProperty("executor") executor: ExecutorSpec,
+    @JsonProperty("sparkConf") sparkConf: Map[String, String])
 
+case class DriverSpec(
+    @JsonProperty("cores") val cores: Long,
+    @JsonProperty("memory") val memory: String)
 
-case class DriverSpec(@JsonProperty("cores") val cores: Long,
-                      @JsonProperty("memory") val memory: String)
-
-case class ExecutorSpec(@JsonProperty("cores") val cores: Long,
-                        @JsonProperty("memory") val memory: String,
-                        @JsonProperty("instances") instances: Long)
+case class ExecutorSpec(
+    @JsonProperty("cores") val cores: Long,
+    @JsonProperty("memory") val memory: String,
+    @JsonProperty("instances") instances: Long)

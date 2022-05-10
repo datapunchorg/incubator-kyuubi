@@ -110,11 +110,12 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
     description = "delete path")
   @GET
   @Path("/deletePath")
-  def deletePath(@QueryParam("path") path: String,
-                 @QueryParam("deleteChildren") deleteChildren: Boolean): DeletePathResponse = {
-      DiscoveryClientProvider.withDiscoveryClient(conf) {
-        c => c.delete(path, deleteChildren)
-      }
+  def deletePath(
+      @QueryParam("path") path: String,
+      @QueryParam("deleteChildren") deleteChildren: Boolean): DeletePathResponse = {
+    DiscoveryClientProvider.withDiscoveryClient(conf) {
+      c => c.delete(path, deleteChildren)
+    }
     DeletePathResponse()
   }
 
@@ -146,8 +147,9 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
     description = "get engine host and port")
   @GET
   @Path("/getEngineByRefId")
-  def getEngineByRefId(@QueryParam("namespace") namespace: String,
-                       @QueryParam("engineRefId") engineRefId: String): GetEngineByRefIdResponse = {
+  def getEngineByRefId(
+      @QueryParam("namespace") namespace: String,
+      @QueryParam("engineRefId") engineRefId: String): GetEngineByRefIdResponse = {
     val result =
       DiscoveryClientProvider.withDiscoveryClient(conf) {
         c => c.getEngineByRefId(namespace, engineRefId)
@@ -167,15 +169,16 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
     description = "get service nodes information")
   @GET
   @Path("/getServiceNodesInfo")
-  def getServiceNodesInfo(@QueryParam("namespace") namespace: String,
-                          @QueryParam("sizeOpt") size: Int = 0,
-                        @QueryParam("silent") silent: Boolean = false):
-    GetServiceNodesInfoResponse = {
-    val sizeOpt = if (size <= 0) {
-      None
-    } else {
-      Some(size)
-    }
+  def getServiceNodesInfo(
+      @QueryParam("namespace") namespace: String,
+      @QueryParam("sizeOpt") size: Int = 0,
+      @QueryParam("silent") silent: Boolean = false): GetServiceNodesInfoResponse = {
+    val sizeOpt =
+      if (size <= 0) {
+        None
+      } else {
+        Some(size)
+      }
     val result =
       DiscoveryClientProvider.withDiscoveryClient(conf) {
         c => c.getServiceNodesInfo(namespace, sizeOpt, silent)
@@ -198,11 +201,7 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
     val refId = Option(request.refId)
     val version = Option(request.version)
     DiscoveryClientProvider.withDiscoveryClient(conf) {
-      c => c.registerExternalService(conf,
-        request.namespace,
-        request.connectionUrl,
-        refId,
-        version)
+      c => c.registerExternalService(conf, request.namespace, request.connectionUrl, refId, version)
     }
     RegisterServiceResponse()
   }
@@ -216,21 +215,21 @@ private[v1] class ServiceRegistryResource extends ApiRequestContext with Logging
   @POST
   @Path("/createAndGetServiceNode")
   @Consumes(Array(MediaType.APPLICATION_JSON))
-  def createAndGetServiceNode(request: CreateAndGetServiceNodeRequest):
-    CreateAndGetServiceNodeResponse = {
+  def createAndGetServiceNode(request: CreateAndGetServiceNodeRequest)
+      : CreateAndGetServiceNodeResponse = {
     val refId = Option(request.refId)
     val version = Option(request.version)
     val result =
       DiscoveryClientProvider.withDiscoveryClient(conf) {
-        c => c.createAndGetServiceNode(conf,
-          request.namespace,
-          request.instance,
-          refId,
-          version,
-          request.external)
+        c =>
+          c.createAndGetServiceNode(
+            conf,
+            request.namespace,
+            request.instance,
+            refId,
+            version,
+            request.external)
       }
     CreateAndGetServiceNodeResponse(result)
   }
 }
-
-

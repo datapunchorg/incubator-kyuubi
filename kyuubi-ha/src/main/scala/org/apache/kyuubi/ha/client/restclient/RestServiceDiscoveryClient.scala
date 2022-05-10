@@ -42,22 +42,19 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
   /**
    * Create a discovery client.
    */
-  override def createClient(): Unit = {
-  }
+  override def createClient(): Unit = {}
 
   /**
    * Close the discovery client.
    */
-  override def closeClient(): Unit = {
-  }
+  override def closeClient(): Unit = {}
 
   /**
    * Create path on discovery service.
    */
   override def create(path: String, mode: String, createParent: Boolean): String = {
     val url = s"$rootUrl/serviceRegistry/createPath"
-    val requestObject = new CreatePathRequest(path = path,
-      mode = mode, createParent = createParent)
+    val requestObject = new CreatePathRequest(path = path, mode = mode, createParent = createParent)
     val responseBody = postHttp(url, requestObject)
     val responseObject = objectMapper.readValue(responseBody, classOf[CreatePathResponse])
     responseObject.path
@@ -168,8 +165,10 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
     }
   }
 
-  override def getServiceNodesInfo(namespace: String, sizeOpt: Option[Int],
-                                   silent: Boolean): Seq[ServiceNodeInfo] = {
+  override def getServiceNodesInfo(
+      namespace: String,
+      sizeOpt: Option[Int],
+      silent: Boolean): Seq[ServiceNodeInfo] = {
     val url = s"$rootUrl/serviceRegistry/getServiceNodesInfo?" +
       s"namespace=${encodeQueryParameter(namespace)}" +
       s"&sizeOpt=${sizeOpt.getOrElse(0)}" +
@@ -180,19 +179,25 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
       GetServiceNodesInfoResponseServiceNodeInfo.convert(_)).toList
   }
 
-  override def registerService(conf: KyuubiConf, namespace: String,
-                               serviceDiscovery: ServiceDiscovery,
-                               refId: Option[String],
-                               version: Option[String], external: Boolean): Unit = {
+  override def registerService(
+      conf: KyuubiConf,
+      namespace: String,
+      serviceDiscovery: ServiceDiscovery,
+      refId: Option[String],
+      version: Option[String],
+      external: Boolean): Unit = {
     registerExternalService(conf, namespace, serviceDiscovery.fe.connectionUrl, refId, version)
   }
 
-  override def registerExternalService(conf: KyuubiConf, namespace: String,
-                                             connectionUrl: String,
-                                             refId: Option[String],
-                                             version: Option[String]): Unit = {
+  override def registerExternalService(
+      conf: KyuubiConf,
+      namespace: String,
+      connectionUrl: String,
+      refId: Option[String],
+      version: Option[String]): Unit = {
     val url = s"$rootUrl/serviceRegistry/registerService"
-    val requestObject = new RegisterServiceRequest(namespace = namespace,
+    val requestObject = new RegisterServiceRequest(
+      namespace = namespace,
       connectionUrl = connectionUrl,
       refId = refId.getOrElse(null),
       version = version.getOrElse(null),
@@ -216,26 +221,31 @@ class RestServiceDiscoveryClient(conf: KyuubiConf)
     true
   }
 
-  override def createAndGetServiceNode(conf: KyuubiConf,
-                                       namespace: String,
-                                       instance: String,
-                                       refId: Option[String],
-                                       version: Option[String],
-                                       external: Boolean): String = {
+  override def createAndGetServiceNode(
+      conf: KyuubiConf,
+      namespace: String,
+      instance: String,
+      refId: Option[String],
+      version: Option[String],
+      external: Boolean): String = {
     val url = s"$rootUrl/serviceRegistry/createAndGetServiceNode"
-    val requestObject = new CreateAndGetServiceNodeRequest(namespace = namespace,
+    val requestObject = new CreateAndGetServiceNodeRequest(
+      namespace = namespace,
       instance = instance,
       refId = refId.getOrElse(null),
       version = version.getOrElse(null),
       external = external)
     val responseBody = postHttp(url, requestObject)
-    val responseObject = objectMapper.readValue(responseBody,
-      classOf[CreateAndGetServiceNodeResponse])
+    val responseObject =
+      objectMapper.readValue(responseBody, classOf[CreateAndGetServiceNodeResponse])
     responseObject.path
   }
 
-  override def startSecretNode(createMode: String, basePath: String,
-                               initData: String, useProtection: Boolean): Unit = {
+  override def startSecretNode(
+      createMode: String,
+      basePath: String,
+      initData: String,
+      useProtection: Boolean): Unit = {
     warn(s"startSecretNode not implemented in ${this.getClass.getSimpleName}")
   }
 
@@ -288,11 +298,20 @@ object RestServiceDiscoveryClient extends Logging {
     client.delete(path, true)
 
     val namespace = "/ns1"
-    client.registerExternalService(new KyuubiConf(), namespace,
-      "localhost:9999", Some("refId1"), None)
+    client.registerExternalService(
+      new KyuubiConf(),
+      namespace,
+      "localhost:9999",
+      Some("refId1"),
+      None)
 
-    client.createAndGetServiceNode(new KyuubiConf(), namespace,
-      "instance1", Some("ref1"), None, true)
+    client.createAndGetServiceNode(
+      new KyuubiConf(),
+      namespace,
+      "instance1",
+      Some("ref1"),
+      None,
+      true)
 
     val serverHost = client.getServerHost(namespace)
     info(serverHost)

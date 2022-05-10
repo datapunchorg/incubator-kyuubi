@@ -317,7 +317,9 @@ object KyuubiConf {
       .checkValue(
         _.forall(FrontendProtocols.values.map(_.toString).contains),
         s"the frontend protocol should be one or more of ${FrontendProtocols.values.mkString(",")}")
-      .createWithDefault(Seq(FrontendProtocols.THRIFT_BINARY.toString, FrontendProtocols.REST.toString))
+      .createWithDefault(Seq(
+        FrontendProtocols.THRIFT_BINARY.toString,
+        FrontendProtocols.REST.toString))
 
   val FRONTEND_BIND_HOST: OptionalConfigEntry[String] = buildConf("kyuubi.frontend.bind.host")
     .doc("(deprecated) Hostname or IP of the machine on which to run the thrift frontend service " +
