@@ -1482,4 +1482,18 @@ object KyuubiConf {
       .version("1.6.0")
       .stringConf
       .createWithDefault("http://localhost:8080/api/v1")
+
+  val SPARK_PUNCH_REST_API_URL: ConfigEntry[String] =
+    buildConf("kyuubi.engine.spark.punch.rest.api.url")
+      .doc("Spark REST API to submit application")
+      .version("1.6.0")
+      .stringConf
+      .createWithDefault("")
+
+  val SPARK_PUNCH_SQL_ENGINE_JAR_File: ConfigEntry[String] =
+    buildConf("kyuubi.engine.spark.punch.sql.engine.jar.file")
+      .doc("Spark jar file for sql engine")
+      .version("1.6.0")
+      .stringConf
+      .createWithDefault("")
 }

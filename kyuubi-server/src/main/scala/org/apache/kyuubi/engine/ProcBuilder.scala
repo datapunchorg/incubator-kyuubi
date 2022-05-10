@@ -189,7 +189,7 @@ trait ProcBuilder {
     file
   }
 
-  final def start: Process = synchronized {
+  def start: Process = synchronized {
     process = processBuilder.start()
     val reader = Files.newBufferedReader(engineLog.toPath, StandardCharsets.UTF_8)
 

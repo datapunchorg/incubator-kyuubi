@@ -20,11 +20,9 @@ package org.apache.kyuubi.engine
 import java.util.concurrent.TimeUnit
 
 import scala.util.Random
-
 import com.codahale.metrics.MetricRegistry
 import com.google.common.annotations.VisibleForTesting
 import org.apache.hadoop.security.UserGroupInformation
-
 import org.apache.kyuubi.{KYUUBI_VERSION, KyuubiSQLException, Logging, Utils}
 import org.apache.kyuubi.config.KyuubiConf
 import org.apache.kyuubi.config.KyuubiConf._
@@ -33,7 +31,7 @@ import org.apache.kyuubi.engine.EngineType.{EngineType, FLINK_SQL, HIVE_SQL, SPA
 import org.apache.kyuubi.engine.ShareLevel.{CONNECTION, GROUP, SERVER, ShareLevel}
 import org.apache.kyuubi.engine.flink.FlinkProcessBuilder
 import org.apache.kyuubi.engine.hive.HiveProcessBuilder
-import org.apache.kyuubi.engine.spark.SparkProcessBuilder
+import org.apache.kyuubi.engine.spark.{SparkProcessBuilder, SparkPunchBuilder}
 import org.apache.kyuubi.engine.trino.TrinoProcessBuilder
 import org.apache.kyuubi.ha.HighAvailabilityConf.{HA_ZK_ENGINE_REF_ID, HA_ZK_NAMESPACE}
 import org.apache.kyuubi.ha.client.{DiscoveryClient, DiscoveryPaths}
@@ -167,8 +165,15 @@ private[kyuubi] class EngineRef(
     conf.set(KYUUBI_ENGINE_SUBMIT_TIME_KEY, String.valueOf(started))
     builder = engineType match {
       case SPARK_SQL =>
-        conf.setIfMissing(SparkProcessBuilder.APP_KEY, defaultEngineName)
-        new SparkProcessBuilder(appUser, conf, extraEngineLog)
+        val apiUrl = conf.get(KyuubiConf.SPARK_PUNCH_REST_API_URL)
+        if (apiUrl == null || apiUrl.isEmpty) {
+          conf.setIfMissing(SparkProcessBuilder.APP_KEY, defaultEngineName)
+          new SparkProcessBuilder(appUser, conf, extraEngineLog)
+        } else {
+          info(s"Using PUNCH REST API URL: $apiUrl")
+          conf.setIfMissing(SparkProcessBuilder.APP_KEY, defaultEngineName)
+          new SparkPunchBuilder(appUser, conf, extraEngineLog, apiUrl)
+        }
       case FLINK_SQL =>
         conf.setIfMissing(FlinkProcessBuilder.APP_KEY, defaultEngineName)
         new FlinkProcessBuilder(appUser, conf, extraEngineLog)
