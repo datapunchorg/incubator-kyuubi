@@ -100,9 +100,8 @@ class SparkPunchBuilder(
       sparkConf = sparkConf,
       arguments = Array(),
       driver = DriverSpec(cores = driverCores, memory = driverMemory),
-      executor = ExecutorSpec(cores = executorCores,
-        memory = executorMemory,
-        instances = executorInstances))
+      executor =
+        ExecutorSpec(cores = executorCores, memory = executorMemory, instances = executorInstances))
 
     val url = s"$restApiUrl/submissions"
     val responseBody = HttpUtils.postHttp(url, submission, user, password)

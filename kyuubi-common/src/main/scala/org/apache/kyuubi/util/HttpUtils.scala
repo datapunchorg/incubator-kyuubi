@@ -57,10 +57,11 @@ object HttpUtils extends Logging {
     }
   }
 
-  private def postHttpImpl[T](url: String,
-                              requestObject: T,
-                              user: String,
-                              password: String): String = {
+  private def postHttpImpl[T](
+      url: String,
+      requestObject: T,
+      user: String,
+      password: String): String = {
     val props = System.getProperties()
     props.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true")
     val requestBody = objectMapper.writeValueAsString(requestObject)
