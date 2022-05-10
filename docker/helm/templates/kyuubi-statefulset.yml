@@ -16,7 +16,7 @@
 #
 
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: kyuubi-server
   labels:
@@ -29,6 +29,7 @@ spec:
     matchLabels:
       app: {{ template "kyuubi.name" . }}
       release: {{ .Release.Name }}
+  serviceName: kyuubi
   template:
     metadata:
       labels:
