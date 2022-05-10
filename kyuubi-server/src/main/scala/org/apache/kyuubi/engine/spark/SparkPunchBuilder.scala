@@ -70,11 +70,17 @@ class SparkPunchBuilder(
 
     var allConf = conf.getAll
 
+    {
+      val key = KyuubiConf.DISCOVERY_CLIENT_CLASS.key
+      val value = "org.apache.kyuubi.ha.client.restclient.RestServiceDiscoveryClient"
+      allConf += (key -> value)
+      info(s"Add conf to Spark: $key=$value")
+    }
     if (!allConf.contains(KyuubiConf.DISCOVERY_CLIENT_REST_URL.key)) {
       val key = KyuubiConf.DISCOVERY_CLIENT_REST_URL.key
       val value = conf.getLocalFrontendRestApiRootUrl()
       allConf += (key -> value)
-      info(s"Add spark conf: $key=$value")
+      info(s"Add conf to Spark: $key=$value")
     }
 
     /**
