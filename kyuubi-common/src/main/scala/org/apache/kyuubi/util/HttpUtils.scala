@@ -38,6 +38,29 @@ object HttpUtils extends Logging {
   }
 
   def postHttp[T](url: String, requestObject: T, user: String, password: String): String = {
+    try {
+      postHttpImpl(url, requestObject, user, password)
+    } catch {
+      case ex: Throwable =>
+        warn(s"Failed to post to url $url", ex)
+        throw ex
+    }
+  }
+
+  def getHttp(url: String): String = {
+    try {
+      getHttpImpl(url)
+    } catch {
+      case ex: Throwable =>
+        warn(s"Failed to get url $url", ex)
+        throw ex
+    }
+  }
+
+  private def postHttpImpl[T](url: String,
+                              requestObject: T,
+                              user: String,
+                              password: String): String = {
     val props = System.getProperties()
     props.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true")
     val requestBody = objectMapper.writeValueAsString(requestObject)
@@ -63,7 +86,7 @@ object HttpUtils extends Logging {
     responseBody
   }
 
-  def getHttp(url: String): String = {
+  private def getHttpImpl(url: String): String = {
     val props = System.getProperties()
     props.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true")
     val clientBuilder = HttpClient.newBuilder()

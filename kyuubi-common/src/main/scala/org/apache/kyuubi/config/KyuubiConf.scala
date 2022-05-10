@@ -1515,4 +1515,34 @@ object KyuubiConf {
       .version("1.6.0")
       .stringConf
       .createWithDefault("3.1")
+  val SPARK_PUNCH_SQL_ENGINE_DRIVER_CORES: ConfigEntry[Int] =
+    buildConf("kyuubi.engine.spark.punch.driver.cores")
+      .doc("Driver cpu cores for Spark application")
+      .version("1.6.0")
+      .intConf
+      .createWithDefault(1)
+  val SPARK_PUNCH_SQL_ENGINE_DRIVER_MEMORY: ConfigEntry[String] =
+    buildConf("kyuubi.engine.spark.punch.driver.memory")
+      .doc("Driver memory for Spark application")
+      .version("1.6.0")
+      .stringConf
+      .createWithDefault("1g")
+  val SPARK_PUNCH_SQL_ENGINE_EXECUTOR_CORES: ConfigEntry[Int] =
+    buildConf("kyuubi.engine.spark.punch.executor.cores")
+      .doc("Executor cpu cores for Spark application")
+      .version("1.6.0")
+      .intConf
+      .createWithDefault(1)
+  val SPARK_PUNCH_SQL_ENGINE_EXECUTOR_MEMORY: ConfigEntry[String] =
+    buildConf("kyuubi.engine.spark.punch.executor.memory")
+      .doc("Executor memory for Spark application")
+      .version("1.6.0")
+      .stringConf
+      .createWithDefault("1g")
+  val SPARK_PUNCH_SQL_ENGINE_EXECUTOR_INSTANCES: ConfigEntry[Int] =
+    buildConf("kyuubi.engine.spark.punch.executor.instances")
+      .doc("Number of executor instances for Spark application")
+      .version("1.6.0")
+      .intConf
+      .createWithDefault(1)
 }

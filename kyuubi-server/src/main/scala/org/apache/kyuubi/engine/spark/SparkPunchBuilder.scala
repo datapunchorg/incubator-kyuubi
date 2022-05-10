@@ -88,14 +88,21 @@ class SparkPunchBuilder(
       sparkConf += (newKey -> v)
     }
 
+    val driverCores = conf.get(KyuubiConf.SPARK_PUNCH_SQL_ENGINE_DRIVER_CORES)
+    val driverMemory = conf.get(KyuubiConf.SPARK_PUNCH_SQL_ENGINE_DRIVER_MEMORY)
+    val executorCores = conf.get(KyuubiConf.SPARK_PUNCH_SQL_ENGINE_EXECUTOR_CORES)
+    val executorMemory = conf.get(KyuubiConf.SPARK_PUNCH_SQL_ENGINE_EXECUTOR_MEMORY)
+    val executorInstances = conf.get(KyuubiConf.SPARK_PUNCH_SQL_ENGINE_EXECUTOR_INSTANCES)
     val submission = PunchSparkSubmission(
       mainClass = mainClass,
       mainApplicationFile = jarFile,
       sparkVersion = jarSparkVersion,
       sparkConf = sparkConf,
       arguments = Array(),
-      driver = DriverSpec(cores = 1, memory = "1g"),
-      executor = ExecutorSpec(cores = 1L, memory = "1", instances = 3))
+      driver = DriverSpec(cores = driverCores, memory = driverMemory),
+      executor = ExecutorSpec(cores = executorCores,
+        memory = executorMemory,
+        instances = executorInstances))
 
     val url = s"$restApiUrl/submissions"
     val responseBody = HttpUtils.postHttp(url, submission, user, password)
