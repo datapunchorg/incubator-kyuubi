@@ -55,7 +55,8 @@ object SparkBuilderUtils extends Logging {
     }
 
     {
-      val port = allConf.getOrElse(KyuubiConf.FRONTEND_THRIFT_BINARY_BIND_PORT.key,
+      val port = allConf.getOrElse(
+        KyuubiConf.FRONTEND_THRIFT_BINARY_BIND_PORT.key,
         DEFAULT_FRONTEND_THRIFT_BINARY_BIND_PORT.toString)
       val key = "spark.ui.extra.ports"
       val value = port
