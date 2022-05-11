@@ -50,7 +50,7 @@ data:
     kyuubi.zookeeper.embedded.client.port.address localhost
     kyuubi.frontend.rest.bind.host 0.0.0.0
     kyuubi.service.discovery.client.rest.url http://kyuubi-server-0.kyuubi-svc.spark-01.svc.cluster.local:10099/api/v1
-    kyuubi.engine.spark.punch.rest.api.url https://aad36e6c769f74521b8e1651e2940da7-490039176.us-west-1.elb.amazonaws.com/sparkapi/v1
+    kyuubi.engine.spark.punch.rest.api.url https://a5938bf0020a0423b93aaa8d5a4784ea-1621414220.us-west-1.elb.amazonaws.com/sparkapi/v1
     kyuubi.engine.spark.punch.rest.api.user user1
     kyuubi.engine.spark.punch.rest.api.password password1
     kyuubi.engine.spark.punch.sql.engine.jar.file=s3a://datapunch-public-01/jars/kyuubi-spark-sql-engine_2.12-1.5.0-incubating.jar

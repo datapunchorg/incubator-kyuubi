@@ -175,7 +175,13 @@ object SparkSQLEngine extends Logging {
       val hostNameOverride = s"$driverServiceName.$driverServiceNamespace.svc.cluster.local"
       kyuubiConf.setIfMissing(KyuubiConf.FRONTEND_CONNECTION_URL_HOSTNAME_OVERRIDE.key,
         hostNameOverride)
-      info(s"Set ${KyuubiConf.FRONTEND_CONNECTION_URL_HOSTNAME_OVERRIDE.key}: $hostNameOverride")
+      info(s"Set KyuubiConf ${KyuubiConf.FRONTEND_CONNECTION_URL_HOSTNAME_OVERRIDE.key}:" +
+        s" $hostNameOverride")
+      val port = kyuubiConf.getOption(KyuubiConf.FRONTEND_THRIFT_BINARY_BIND_PORT.key)
+        .getOrElse(DEFAULT_FRONTEND_THRIFT_BINARY_BIND_PORT.toString)
+      _sparkConf.setIfMissing("spark.ui.extra.ports", port)
+      info(s"Set SparkConf ${KyuubiConf.FRONTEND_THRIFT_BINARY_BIND_PORT.key}:" +
+        s" $port")
     } else {
       info(s"Not running in Kubernetes")
     }
