@@ -45,14 +45,15 @@ data:
     #
     # kyuubi.authentication           NONE
     #
-    kyuubi.frontend.bind.host={{ .Values.server.bind.host }}
-    kyuubi.frontend.bind.port={{ .Values.server.bind.port }}
+
+    kyuubi.frontend.bind.host {{ .Values.server.bind.host }}
+    kyuubi.frontend.bind.port {{ .Values.server.bind.port }}
     kyuubi.zookeeper.embedded.client.port.address localhost
     kyuubi.frontend.rest.bind.host 0.0.0.0
-    kyuubi.service.discovery.client.rest.url http://kyuubi-server-0.kyuubi-svc.spark-01.svc.cluster.local:10099/api/v1
-    kyuubi.engine.spark.punch.rest.api.url https://a5938bf0020a0423b93aaa8d5a4784ea-1621414220.us-west-1.elb.amazonaws.com/sparkapi/v1
-    kyuubi.engine.spark.punch.rest.api.user user1
-    kyuubi.engine.spark.punch.rest.api.password password1
-    kyuubi.engine.spark.punch.sql.engine.jar.file=s3a://datapunch-public-01/jars/kyuubi-spark-sql-engine_2.12-1.5.0-incubating.jar
+    kyuubi.service.discovery.client.rest.url {{ .Values.serviceRegistry.restUrl }}
+    kyuubi.engine.spark.punch.rest.api.url {{ .Values.sparkApiGateway.restUrl }}
+    kyuubi.engine.spark.punch.rest.api.user {{ .Values.sparkApiGateway.user }}
+    kyuubi.engine.spark.punch.rest.api.password {{ .Values.sparkApiGateway.password }}
+    kyuubi.engine.spark.punch.sql.engine.jar.file {{ .Values.sparkSqlEngine.jarFile }}
 
     # Details in https://kyuubi.apache.org/docs/latest/deployment/settings.html

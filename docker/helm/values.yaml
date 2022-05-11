@@ -67,3 +67,14 @@ resources:
   requests:
     cpu: 1
     memory: 4Gi
+
+serviceRegistry:
+  restUrl: http://kyuubi-server-0.kyuubi-svc.spark-01.svc.cluster.local:10099/api/v1
+
+sparkApiGateway:
+  restUrl: https://a5938bf0020a0423b93aaa8d5a4784ea-1621414220.us-west-1.elb.amazonaws.com/sparkapi/v1
+  user: user1
+  password: password1
+
+sparkSqlEngine:
+  jarFile: s3a://datapunch-public-01/jars/kyuubi-spark-sql-engine_2.12-1.5.0-incubating.jar
