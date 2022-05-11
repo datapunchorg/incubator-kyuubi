@@ -163,7 +163,8 @@ object SparkSQLEngine extends Logging {
     val defaultCat = if (KyuubiSparkUtil.hiveClassesArePresent) "hive" else "in-memory"
     _sparkConf.setIfMissing("spark.sql.catalogImplementation", defaultCat)
 
-    kyuubiConf.setIfMissing(KyuubiConf.FRONTEND_THRIFT_BINARY_BIND_PORT,
+    kyuubiConf.setIfMissing(
+      KyuubiConf.FRONTEND_THRIFT_BINARY_BIND_PORT,
       DEFAULT_FRONTEND_THRIFT_BINARY_BIND_PORT)
     kyuubiConf.setIfMissing(HA_ZK_CONN_RETRY_POLICY, RetryPolicies.N_TIME.toString)
 
@@ -173,7 +174,8 @@ object SparkSQLEngine extends Logging {
       val driverServiceName = driverPodName.replace("-driver", "-ui-svc")
       val driverServiceNamespace = "spark-01" // TODO remove this hard code value
       val hostNameOverride = s"$driverServiceName.$driverServiceNamespace.svc.cluster.local"
-      kyuubiConf.setIfMissing(KyuubiConf.FRONTEND_CONNECTION_URL_HOSTNAME_OVERRIDE.key,
+      kyuubiConf.setIfMissing(
+        KyuubiConf.FRONTEND_CONNECTION_URL_HOSTNAME_OVERRIDE.key,
         hostNameOverride)
       info(s"Set KyuubiConf ${KyuubiConf.FRONTEND_CONNECTION_URL_HOSTNAME_OVERRIDE.key}:" +
         s" $hostNameOverride")
