@@ -167,6 +167,19 @@ object SparkSQLEngine extends Logging {
       DEFAULT_FRONTEND_THRIFT_BINARY_BIND_PORT)
     kyuubiConf.setIfMissing(HA_ZK_CONN_RETRY_POLICY, RetryPolicies.N_TIME.toString)
 
+    val driverPodName = _sparkConf.get("spark.kubernetes.driver.pod.name", "")
+    if (driverPodName != null && !driverPodName.isEmpty) {
+      info(s"Running in Kubernetes due to spark.kubernetes.driver.pod.name: $driverPodName")
+      val driverServiceName = driverPodName.replace("-driver", "-ui-svc")
+      val driverServiceNamespace = "spark-01" // TODO remove this hard code value
+      val hostNameOverride = s"$driverServiceName.$driverServiceNamespace.svc.cluster.local"
+      kyuubiConf.setIfMissing(KyuubiConf.FRONTEND_CONNECTION_URL_HOSTNAME_OVERRIDE.key,
+        hostNameOverride)
+      info(s"Set ${KyuubiConf.FRONTEND_CONNECTION_URL_HOSTNAME_OVERRIDE.key}: $hostNameOverride")
+    } else {
+      info(s"Not running in Kubernetes")
+    }
+
     // Pass kyuubi config from spark with `spark.kyuubi`
     val sparkToKyuubiPrefix = "spark.kyuubi."
     _sparkConf.getAllWithPrefix(sparkToKyuubiPrefix).foreach { case (k, v) =>
