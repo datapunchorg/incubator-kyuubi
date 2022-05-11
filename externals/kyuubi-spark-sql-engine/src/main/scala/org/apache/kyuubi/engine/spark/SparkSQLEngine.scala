@@ -119,6 +119,7 @@ case class SparkSQLEngine(spark: SparkSession) extends Serverable("SparkSQLEngin
 }
 
 object SparkSQLEngine extends Logging {
+  val DEFAULT_FRONTEND_THRIFT_BINARY_BIND_PORT = 5050
 
   private var _sparkConf: SparkConf = _
 
@@ -162,7 +163,8 @@ object SparkSQLEngine extends Logging {
     val defaultCat = if (KyuubiSparkUtil.hiveClassesArePresent) "hive" else "in-memory"
     _sparkConf.setIfMissing("spark.sql.catalogImplementation", defaultCat)
 
-    kyuubiConf.setIfMissing(KyuubiConf.FRONTEND_THRIFT_BINARY_BIND_PORT, 0)
+    kyuubiConf.setIfMissing(KyuubiConf.FRONTEND_THRIFT_BINARY_BIND_PORT,
+      DEFAULT_FRONTEND_THRIFT_BINARY_BIND_PORT)
     kyuubiConf.setIfMissing(HA_ZK_CONN_RETRY_POLICY, RetryPolicies.N_TIME.toString)
 
     // Pass kyuubi config from spark with `spark.kyuubi`

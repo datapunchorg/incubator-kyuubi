@@ -1551,4 +1551,11 @@ object KyuubiConf {
       .version("1.6.0")
       .intConf
       .createWithDefault(1)
+
+  val FRONTEND_CONNECTION_URL_HOSTNAME_OVERRIDE: OptionalConfigEntry[String] =
+    buildConf("kyuubi.frontend.connection.url.hostname.override")
+      .doc("Frontend services hostname to be used in connectionUrl")
+      .version("1.6.0")
+      .stringConf
+      .createOptional
 }

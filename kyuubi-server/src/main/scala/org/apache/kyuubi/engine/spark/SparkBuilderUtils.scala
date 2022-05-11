@@ -21,6 +21,7 @@ import org.apache.kyuubi.Logging
 import org.apache.kyuubi.config.KyuubiConf
 
 object SparkBuilderUtils extends Logging {
+  val DEFAULT_FRONTEND_THRIFT_BINARY_BIND_PORT = 5050
 
   def addExtraKyuubiConf(conf: KyuubiConf): Map[String, String] = {
     var allConf: Map[String, String] = conf.getAll
@@ -45,6 +46,14 @@ object SparkBuilderUtils extends Logging {
       allConf += (key -> value)
       info(s"Add conf to Spark: $key=$value")
     }
+
+    if (!allConf.contains(KyuubiConf.FRONTEND_THRIFT_BINARY_BIND_PORT.key)) {
+      val key = KyuubiConf.FRONTEND_THRIFT_BINARY_BIND_PORT.key
+      val value = DEFAULT_FRONTEND_THRIFT_BINARY_BIND_PORT
+      allConf += (key -> value.toString)
+      info(s"Add conf to Spark: $key=$value")
+    }
+
     allConf
   }
 
