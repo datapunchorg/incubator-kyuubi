@@ -21,6 +21,8 @@ import java.io.IOException
 
 import org.apache.kyuubi.{KyuubiException, Logging}
 import org.apache.kyuubi.config.KyuubiConf
+import org.apache.kyuubi.ha.HighAvailabilityConf
+import org.apache.kyuubi.util.ClassUtils
 
 object DiscoveryClientProvider extends Logging {
 
@@ -42,14 +44,18 @@ object DiscoveryClientProvider extends Logging {
   }
 
   def createDiscoveryClient(conf: KyuubiConf): DiscoveryClient = {
-    val className = conf.get(KyuubiConf.DISCOVERY_CLIENT_CLASS)
-    val clazz =
-      try {
-        Class.forName(className)
-      } catch {
-        case ex: Throwable => throw new KyuubiException(s"Class not found $className", ex)
-      }
-    val constructor = clazz.getConstructor(conf.getClass)
-    constructor.newInstance(conf).asInstanceOf[DiscoveryClient]
+    val classLoader = Thread.currentThread.getContextClassLoader
+    val className = conf.get(HighAvailabilityConf.HA_DISCOVERY_CLIENT_CLASS)
+    if (className.isEmpty) {
+      throw new KyuubiException(
+        s"${HighAvailabilityConf.HA_DISCOVERY_CLIENT_CLASS.key} cannot be empty.")
+    }
+    val cls = Class.forName(className, true, classLoader)
+    cls match {
+      case c if classOf[DiscoveryClient].isAssignableFrom(cls) =>
+        ClassUtils.createInstance[DiscoveryClient](c, conf)
+      case _ => throw new KyuubiException(
+          s"$className must extend of ${DiscoveryClient.getClass.getName}")
+    }
   }
 }
