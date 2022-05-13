@@ -19,6 +19,7 @@ package org.apache.kyuubi.engine.spark
 
 import org.apache.kyuubi.Logging
 import org.apache.kyuubi.config.KyuubiConf
+import org.apache.kyuubi.ha.HighAvailabilityConf
 
 object SparkBuilderUtils extends Logging {
   val DEFAULT_FRONTEND_THRIFT_BINARY_BIND_PORT = 5050
@@ -27,7 +28,7 @@ object SparkBuilderUtils extends Logging {
     var allConf: Map[String, String] = conf.getAll
 
     {
-      val key = KyuubiConf.DISCOVERY_CLIENT_CLASS.key
+      val key = HighAvailabilityConf.HA_DISCOVERY_CLIENT_CLASS.key
       val value = "org.apache.kyuubi.ha.client.restclient.RestServiceDiscoveryClient"
       allConf += (key -> value)
       info(s"Add conf to Spark: $key=$value")
@@ -40,8 +41,8 @@ object SparkBuilderUtils extends Logging {
       info(s"Add conf to Spark: $key=$value")
     }
 
-    if (!allConf.contains(KyuubiConf.DISCOVERY_CLIENT_REST_URL.key)) {
-      val key = KyuubiConf.DISCOVERY_CLIENT_REST_URL.key
+    if (!allConf.contains(HighAvailabilityConf.HA_DISCOVERY_CLIENT_REST_URL.key)) {
+      val key = HighAvailabilityConf.HA_DISCOVERY_CLIENT_REST_URL.key
       val value = conf.getLocalFrontendRestApiRootUrl()
       allConf += (key -> value)
       info(s"Add conf to Spark: $key=$value")

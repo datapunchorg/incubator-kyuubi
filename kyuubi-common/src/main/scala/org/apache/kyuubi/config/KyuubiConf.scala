@@ -1477,20 +1477,6 @@ object KyuubiConf {
       .booleanConf
       .createWithDefault(false)
 
-  val DISCOVERY_CLIENT_CLASS: ConfigEntry[String] =
-    buildConf("kyuubi.service.discovery.client.class")
-      .doc("Class name for service discovery client.")
-      .version("1.6.0")
-      .stringConf
-      .createWithDefault("org.apache.kyuubi.ha.client.zookeeper.ZookeeperDiscoveryClient")
-
-  val DISCOVERY_CLIENT_REST_URL: ConfigEntry[String] =
-    buildConf("kyuubi.service.discovery.client.rest.url")
-      .doc("Connection url for REST based service discovery client.")
-      .version("1.6.0")
-      .stringConf
-      .createWithDefault("")
-
   val SPARK_PUNCH_REST_API_URL: ConfigEntry[String] =
     buildConf("kyuubi.engine.spark.punch.rest.api.url")
       .doc("Spark REST API to submit application")

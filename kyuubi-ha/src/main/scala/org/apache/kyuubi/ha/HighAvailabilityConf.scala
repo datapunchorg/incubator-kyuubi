@@ -166,4 +166,11 @@ object HighAvailabilityConf {
       .stringConf
       .checkValue(_.nonEmpty, "must not be empty")
       .createWithDefault("org.apache.kyuubi.ha.client.zookeeper.ZookeeperDiscoveryClient")
+
+  val HA_DISCOVERY_CLIENT_REST_URL: ConfigEntry[String] =
+    buildConf("kyuubi.ha.service.discovery.client.rest.url")
+      .doc("Connection url for REST based service discovery client.")
+      .version("1.6.0")
+      .stringConf
+      .createWithDefault("")
 }
