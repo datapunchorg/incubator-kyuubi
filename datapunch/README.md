@@ -1,3 +1,6 @@
+Pass proxy user to Spark application like "--proxy-user anonymous"
+
+
 Add ingress like: https://kubernetes.github.io/ingress-nginx/examples/rewrite/
 
 $ echo '
