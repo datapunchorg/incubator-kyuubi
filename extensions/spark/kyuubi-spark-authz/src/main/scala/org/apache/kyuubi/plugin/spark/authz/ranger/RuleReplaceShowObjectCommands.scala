@@ -25,16 +25,50 @@ import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.execution.command.RunnableCommand
 
 import org.apache.kyuubi.plugin.spark.authz.{ObjectType, OperationType}
-import org.apache.kyuubi.plugin.spark.authz.util.{AuthZUtils, WithInternalChild}
+import org.apache.kyuubi.plugin.spark.authz.util.{AuthZUtils, ObjectFilterPlaceHolder, WithInternalChild}
 
 class RuleReplaceShowObjectCommands extends Rule[LogicalPlan] {
   override def apply(plan: LogicalPlan): LogicalPlan = plan match {
     case r: RunnableCommand if r.nodeName == "ShowTablesCommand" => FilteredShowTablesCommand(r)
+    // show databases in spark2.4.x
+    case r: RunnableCommand if r.nodeName == "ShowDatabasesCommand" =>
+      FilteredShowDatabasesCommand(r)
+    case n: LogicalPlan if n.nodeName == "ShowNamespaces" =>
+      ObjectFilterPlaceHolder(n)
+    case r: RunnableCommand if r.nodeName == "ShowFunctionsCommand" =>
+      FilteredShowFunctionsCommand(r)
     case _ => plan
   }
 }
 
 case class FilteredShowTablesCommand(delegated: RunnableCommand)
+  extends FilteredShowObjectCommand(delegated) {
+
+  protected def isAllowed(r: Row, ugi: UserGroupInformation): Boolean = {
+    val database = r.getString(0)
+    val table = r.getString(1)
+    val isTemp = r.getBoolean(2)
+    val objectType = if (isTemp) ObjectType.VIEW else ObjectType.TABLE
+    val resource = AccessResource(objectType, database, table, null)
+    val request = AccessRequest(resource, ugi, OperationType.SHOWTABLES, AccessType.USE)
+    val result = SparkRangerAdminPlugin.isAccessAllowed(request)
+    result != null && result.getIsAllowed
+  }
+}
+
+case class FilteredShowDatabasesCommand(delegated: RunnableCommand)
+  extends FilteredShowObjectCommand(delegated) {
+
+  override protected def isAllowed(r: Row, ugi: UserGroupInformation): Boolean = {
+    val database = r.getString(0)
+    val resource = AccessResource(ObjectType.DATABASE, database, null, null)
+    val request = AccessRequest(resource, ugi, OperationType.SHOWDATABASES, AccessType.USE)
+    val result = SparkRangerAdminPlugin.isAccessAllowed(request)
+    result != null && result.getIsAllowed
+  }
+}
+
+abstract class FilteredShowObjectCommand(delegated: RunnableCommand)
   extends RunnableCommand with WithInternalChild {
 
   override val output: Seq[Attribute] = delegated.output
@@ -45,16 +79,25 @@ case class FilteredShowTablesCommand(delegated: RunnableCommand)
     rows.filter(r => isAllowed(r, ugi))
   }
 
-  private def isAllowed(r: Row, ugi: UserGroupInformation): Boolean = {
-    val database = r.getString(0)
-    val table = r.getString(1)
-    val isTemp = r.getBoolean(2)
-    val objectType = if (isTemp) ObjectType.VIEW else ObjectType.TABLE
-    val resource = AccessResource(objectType, database, table, null)
-    val request = AccessRequest(resource, ugi, OperationType.SHOWTABLES, AccessType.USE)
+  protected def isAllowed(r: Row, ugi: UserGroupInformation): Boolean
+
+  override def withNewChildrenInternal(newChildren: IndexedSeq[LogicalPlan]): LogicalPlan = this
+}
+
+case class FilteredShowFunctionsCommand(delegated: RunnableCommand)
+  extends FilteredShowObjectCommand(delegated) with WithInternalChild {
+
+  override protected def isAllowed(r: Row, ugi: UserGroupInformation): Boolean = {
+    val functionName = r.getString(0)
+    val items = functionName.split("\\.", 2)
+    // the system functions return true
+    if (items.length == 1) {
+      return true
+    }
+
+    val resource = AccessResource(ObjectType.FUNCTION, items(0), items(1), null)
+    val request = AccessRequest(resource, ugi, OperationType.SHOWFUNCTIONS, AccessType.USE)
     val result = SparkRangerAdminPlugin.isAccessAllowed(request)
     result != null && result.getIsAllowed
   }
-
-  override def withNewChildrenInternal(newChildren: IndexedSeq[LogicalPlan]): LogicalPlan = this
 }

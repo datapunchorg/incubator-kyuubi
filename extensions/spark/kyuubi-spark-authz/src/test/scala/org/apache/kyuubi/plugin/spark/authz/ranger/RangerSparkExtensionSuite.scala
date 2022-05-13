@@ -273,6 +273,49 @@ abstract class RangerSparkExtensionSuite extends KyuubiFunSuite with SparkSessio
       doAs("admin", sql(s"DROP DATABASE IF EXISTS $db"))
     }
   }
+
+  test("show databases") {
+    val db = "default2"
+    try {
+      doAs("admin", sql(s"CREATE DATABASE IF NOT EXISTS $db"))
+      doAs("admin", assert(sql(s"SHOW DATABASES").collect().length == 2))
+      doAs("admin", assert(sql(s"SHOW DATABASES").collectAsList().get(0).getString(0) == "default"))
+      doAs("admin", assert(sql(s"SHOW DATABASES").collectAsList().get(1).getString(0) == s"$db"))
+
+      doAs("bob", assert(sql(s"SHOW DATABASES").collect().length == 1))
+      doAs("bob", assert(sql(s"SHOW DATABASES").collectAsList().get(0).getString(0) == "default"))
+    } finally {
+      doAs("admin", sql(s"DROP DATABASE IF EXISTS $db"))
+    }
+  }
+
+  test("show functions") {
+    val default = "default"
+    val db3 = "default3"
+    val function1 = "function1"
+    try {
+      doAs("admin", sql(s"CREATE FUNCTION $function1 AS 'Function1'"))
+      doAs("admin", assert(sql(s"show user functions $default.$function1").collect().length == 1))
+      doAs("bob", assert(sql(s"show user functions $default.$function1").collect().length == 0))
+
+      doAs("admin", sql(s"CREATE DATABASE IF NOT EXISTS $db3"))
+      doAs("admin", sql(s"CREATE FUNCTION $db3.$function1 AS 'Function1'"))
+
+      doAs("admin", assert(sql(s"show user functions $db3.$function1").collect().length == 1))
+      doAs("bob", assert(sql(s"show user functions $db3.$function1").collect().length == 0))
+
+      doAs("admin", assert(sql(s"show system functions").collect().length > 0))
+      doAs("bob", assert(sql(s"show system functions").collect().length > 0))
+
+      val adminSystemFunctionCount = doAs("admin", sql(s"show system functions").collect().length)
+      val bobSystemFunctionCount = doAs("bob", sql(s"show system functions").collect().length)
+      assert(adminSystemFunctionCount == bobSystemFunctionCount)
+    } finally {
+      doAs("admin", sql(s"DROP FUNCTION IF EXISTS $default.$function1"))
+      doAs("admin", sql(s"DROP FUNCTION IF EXISTS $db3.$function1"))
+      doAs("admin", sql(s"DROP DATABASE IF EXISTS $db3"))
+    }
+  }
 }
 
 class InMemoryCatalogRangerSparkExtensionSuite extends RangerSparkExtensionSuite {

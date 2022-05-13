@@ -15,15 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.kyuubi.server.api
+package org.apache.kyuubi.plugin.spark.authz.util
 
-import org.glassfish.jersey.server.ResourceConfig
+import org.apache.spark.sql.catalyst.expressions.Attribute
+import org.apache.spark.sql.catalyst.plans.logical.{LeafNode, LogicalPlan}
 
-import org.apache.kyuubi.server.api.v1.KyuubiOpenApiResource
-
-class OpenAPIConfig extends ResourceConfig {
-  packages("org.apache.kyuubi.server.api.v1")
-  register(classOf[KyuubiOpenApiResource])
-  register(classOf[KyuubiScalaObjectMapper])
-  register(classOf[RestExceptionMapper])
+case class ObjectFilterPlaceHolder(child: LogicalPlan) extends LeafNode {
+  override def output: Seq[Attribute] = child.output
 }

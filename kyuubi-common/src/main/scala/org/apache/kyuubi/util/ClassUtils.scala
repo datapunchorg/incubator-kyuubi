@@ -15,15 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.kyuubi.server.api
+package org.apache.kyuubi.util
 
-import org.glassfish.jersey.server.ResourceConfig
+import org.apache.kyuubi.config.KyuubiConf
 
-import org.apache.kyuubi.server.api.v1.KyuubiOpenApiResource
+object ClassUtils {
 
-class OpenAPIConfig extends ResourceConfig {
-  packages("org.apache.kyuubi.server.api.v1")
-  register(classOf[KyuubiOpenApiResource])
-  register(classOf[KyuubiScalaObjectMapper])
-  register(classOf[RestExceptionMapper])
+  /**
+   * Create an object instance with given [[KyuubiConf]].
+   * @param clazz object class
+   * @param conf configuration ([[KyuubiConf]])
+   * @tparam T object instance type to create
+   * @return
+   */
+  def createInstance[T](clazz: Class[_], conf: KyuubiConf): T = {
+    val confConstructor = clazz.getConstructors.exists(p => {
+      val params = p.getParameterTypes
+      params.length == 1 && classOf[KyuubiConf].isAssignableFrom(params(0))
+    })
+    if (confConstructor) {
+      clazz.getConstructor(classOf[KyuubiConf]).newInstance(conf)
+        .asInstanceOf[T]
+    } else {
+      clazz.newInstance().asInstanceOf[T]
+    }
+  }
 }

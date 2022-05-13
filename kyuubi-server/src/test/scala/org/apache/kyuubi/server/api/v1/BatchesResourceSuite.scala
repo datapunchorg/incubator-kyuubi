@@ -33,9 +33,24 @@ import org.apache.kyuubi.config.KyuubiConf.{ENGINE_CHECK_INTERVAL, ENGINE_SPARK_
 import org.apache.kyuubi.engine.spark.SparkProcessBuilder
 import org.apache.kyuubi.server.http.authentication.AuthenticationHandler.AUTHORIZATION_HEADER
 import org.apache.kyuubi.service.authentication.KyuubiAuthenticationFactory
-import org.apache.kyuubi.session.KyuubiSessionManager
+import org.apache.kyuubi.session.{KyuubiBatchSessionImpl, KyuubiSessionManager}
 
 class BatchesResourceSuite extends KyuubiFunSuite with RestFrontendTestHelper {
+
+  override def afterEach(): Unit = {
+    val sessionManager = fe.be.sessionManager
+    sessionManager.asInstanceOf[KyuubiSessionManager]
+      .getBatchSessionList(null, 0, Int.MaxValue)
+      .map(_.asInstanceOf[KyuubiBatchSessionImpl])
+      .foreach { session =>
+        try {
+          session.batchJobSubmissionOp.killBatchApplication()
+        } finally {
+          sessionManager.closeSession(session.handle)
+        }
+      }
+  }
+
   test("open batch session") {
     val sparkProcessBuilder = new SparkProcessBuilder("kyuubi", conf)
     val appName = "spark-batch-submission"
@@ -104,7 +119,7 @@ class BatchesResourceSuite extends KyuubiFunSuite with RestFrontendTestHelper {
 
       // check both kyuubi log and engine log
       assert(logs.exists(_.contains("/bin/spark-submit")) && logs.exists(
-        _.contains(s"spark.SparkContext: Submitted application: $appName")))
+        _.contains(s"SparkContext: Submitted application: $appName")))
     }
 
     // invalid user name
@@ -260,5 +275,52 @@ class BatchesResourceSuite extends KyuubiFunSuite with RestFrontendTestHelper {
     val getBatchListResponse6 = response6.readEntity(classOf[GetBatchesResponse])
     assert(getBatchListResponse6.total == 1)
     sessionManager.allSessions().map(_.close())
+  }
+
+  test("negative request") {
+    val sparkProcessBuilder = new SparkProcessBuilder("kyuubi", conf)
+
+    // open batch session
+    Seq(
+      (
+        BatchRequest(
+          null,
+          sparkProcessBuilder.mainResource.get,
+          sparkProcessBuilder.mainClass,
+          "test-name"),
+        "batchType is a required parameter"),
+      (
+        BatchRequest(
+          "sp",
+          sparkProcessBuilder.mainResource.get,
+          sparkProcessBuilder.mainClass,
+          "test-name"),
+        "due to Batch type sp unsupported"),
+      (
+        BatchRequest(
+          "SPARK",
+          null,
+          sparkProcessBuilder.mainClass,
+          "test-name"),
+        "resource is a required parameter")).foreach { case (req, msg) =>
+      val response = webTarget.path("api/v1/batches")
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .post(Entity.entity(req, MediaType.APPLICATION_JSON_TYPE))
+      assert(500 == response.getStatus)
+      assert(response.readEntity(classOf[String]).contains(msg))
+    }
+
+    // get batch by id
+    Seq(
+      ("??", "Invalid batchId: ??"),
+      (
+        "3ea7ddbe-0c35-45da-85ad-3186770181a7",
+        "Invalid batchId: 3ea7ddbe-0c35-45da-85ad-3186770181a7")).foreach { case (batchId, msg) =>
+      val response = webTarget.path(s"api/v1/batches/$batchId")
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .get
+      assert(404 == response.getStatus)
+      assert(response.readEntity(classOf[String]).contains(msg))
+    }
   }
 }

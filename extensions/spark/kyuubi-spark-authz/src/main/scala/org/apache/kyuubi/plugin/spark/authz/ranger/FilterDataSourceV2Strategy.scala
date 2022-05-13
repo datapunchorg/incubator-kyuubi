@@ -14,16 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.kyuubi.plugin.spark.authz.ranger
 
-package org.apache.kyuubi.server.api
+import org.apache.spark.sql.{SparkSession, Strategy}
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.execution.SparkPlan
 
-import org.glassfish.jersey.server.ResourceConfig
+import org.apache.kyuubi.plugin.spark.authz.util.ObjectFilterPlaceHolder
 
-import org.apache.kyuubi.server.api.v1.KyuubiOpenApiResource
-
-class OpenAPIConfig extends ResourceConfig {
-  packages("org.apache.kyuubi.server.api.v1")
-  register(classOf[KyuubiOpenApiResource])
-  register(classOf[KyuubiScalaObjectMapper])
-  register(classOf[RestExceptionMapper])
+class FilterDataSourceV2Strategy(spark: SparkSession) extends Strategy {
+  override def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
+    case ObjectFilterPlaceHolder(child) if child.nodeName == "ShowNamespaces" =>
+      spark.sessionState.planner.plan(child).map(FilteredShowNamespaceExec).toSeq
+    case _ => Nil
+  }
 }
